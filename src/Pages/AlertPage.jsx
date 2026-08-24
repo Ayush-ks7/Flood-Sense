@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+
+//This part will be replaced by the API 
 const alerts = [
   {
     severity: "Emergency",
