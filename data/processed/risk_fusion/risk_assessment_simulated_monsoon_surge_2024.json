@@ -1,0 +1,56 @@
+{
+  "scenario_name": "Teesta Severe Monsoon Surge Simulation (Peak Season)",
+  "timestamp": "2024-06-20 14:00:00",
+  "alert_level": "ALERT",
+  "alert_color": "#EA580C",
+  "actionable_guidance": "HIGH READINESS: Water levels exceeding warning thresholds. Continuous telemetry monitoring active, prepare relief shelters and vulnerable infrastructure.",
+  "current_status": {
+    "melli_water_level_m": 226.4,
+    "melli_rise_1h_m": 0.35,
+    "rain_1d_mm": 65.0,
+    "rain_3d_mm": 145.0,
+    "rain_7d_mm": 230.0
+  },
+  "river_level_forecast": [
+    {
+      "horizon": "+6h",
+      "p10_m": 223.62,
+      "p50_m": 224.67,
+      "p90_m": 226.54,
+      "warning_threshold_m": 226.0,
+      "danger_threshold_m": 227.0,
+      "hfl_threshold_m": 228.0
+    },
+    {
+      "horizon": "+12h",
+      "p10_m": 223.65,
+      "p50_m": 224.58,
+      "p90_m": 226.22,
+      "warning_threshold_m": 226.0,
+      "danger_threshold_m": 227.0,
+      "hfl_threshold_m": 228.0
+    },
+    {
+      "horizon": "+24h",
+      "p10_m": 223.56,
+      "p50_m": 224.5,
+      "p90_m": 226.07,
+      "warning_threshold_m": 226.0,
+      "danger_threshold_m": 227.0,
+      "hfl_threshold_m": 228.0
+    }
+  ],
+  "exposure_impact": {
+    "flooded_area_sqkm": 12.23,
+    "buildings_exposed": 2201,
+    "roads_flooded_km": 30.58,
+    "schools_at_risk": 3,
+    "hospitals_at_risk": 1,
+    "bridges_threatened": 4
+  },
+  "uncertainty_assessment": {
+    "interval_type": "P10-P90 Prediction Interval (80% nominal coverage)",
+    "calibration_status": "Validated on historical record with 96.1% empirical test coverage",
+    "mean_spread_m": 2.67
+  }
+}

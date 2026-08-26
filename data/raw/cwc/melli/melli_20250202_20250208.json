@@ -1,0 +1,530 @@
+[
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.21,
+    "actualTime": "2025-02-06 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.21,
+    "actualTime": "2025-02-07 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.22,
+    "actualTime": "2025-02-05 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.23,
+    "actualTime": "2025-02-04 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.23,
+    "actualTime": "2025-02-06 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.24,
+    "actualTime": "2025-02-03 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.24,
+    "actualTime": "2025-02-05 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.24,
+    "actualTime": "2025-02-07 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.25,
+    "actualTime": "2025-02-06 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.25,
+    "actualTime": "2025-02-08 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.26,
+    "actualTime": "2025-02-04 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.26,
+    "actualTime": "2025-02-08 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.27,
+    "actualTime": "2025-02-03 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.29,
+    "actualTime": "2025-02-04 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.29,
+    "actualTime": "2025-02-07 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.3,
+    "actualTime": "2025-02-03 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.3,
+    "actualTime": "2025-02-05 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.3,
+    "actualTime": "2025-02-08 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.7,
+    "actualTime": "2025-02-02 16:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.72,
+    "actualTime": "2025-02-02 12:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 222.85,
+    "actualTime": "2025-02-02 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 223.04,
+    "actualTime": "2025-02-02 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 223.04,
+    "actualTime": "2025-02-03 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "DWRIS-06",
+    "warningLevel": 226.0,
+    "dangerLevel": 227.0,
+    "highestFlowLevel": 228.0,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Level",
+    "dataTypeCode": "HHS",
+    "value": 223.04,
+    "actualTime": "2025-02-04 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  }
+]

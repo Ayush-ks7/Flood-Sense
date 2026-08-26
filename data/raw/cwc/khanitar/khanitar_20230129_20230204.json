@@ -1,0 +1,464 @@
+[
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.5,
+    "actualTime": "2023-01-31 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.6,
+    "actualTime": "2023-01-30 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.6,
+    "actualTime": "2023-02-03 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.6,
+    "actualTime": "2023-02-03 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.6,
+    "actualTime": "2023-02-04 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.65,
+    "actualTime": "2023-02-01 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.65,
+    "actualTime": "2023-02-04 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.7,
+    "actualTime": "2023-01-29 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.7,
+    "actualTime": "2023-01-29 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.7,
+    "actualTime": "2023-02-01 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.7,
+    "actualTime": "2023-02-02 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.7,
+    "actualTime": "2023-02-02 18:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.8,
+    "actualTime": "2023-01-31 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.85,
+    "actualTime": "2023-02-04 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.9,
+    "actualTime": "2023-02-03 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 287.95,
+    "actualTime": "2023-02-02 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 288.1,
+    "actualTime": "2023-02-01 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 288.35,
+    "actualTime": "2023-01-29 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 288.7,
+    "actualTime": "2023-01-30 13:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 289.3,
+    "actualTime": "2023-01-31 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  },
+  {
+    "stationCode": "013-LBDjPG",
+    "warningLevel": null,
+    "dangerLevel": null,
+    "highestFlowLevel": 298.4,
+    "frl": null,
+    "mwl": null,
+    "stationType": "Base",
+    "dataTypeCode": "HHS",
+    "value": 289.35,
+    "actualTime": "2023-01-30 08:00:00.0",
+    "otherParam": "HHS",
+    "hydromatForeCast": [
+      {
+        "issueDate": null,
+        "forecastedDate": null,
+        "foreCastNo": 0,
+        "realValue": null,
+        "trend": null
+      }
+    ]
+  }
+]
