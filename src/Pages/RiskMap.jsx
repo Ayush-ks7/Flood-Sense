@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Users,
   TriangleAlert,
@@ -14,44 +14,50 @@ import {
   Clipboard,
 } from "lucide-react";
 import FloodMap from "./FloodMap";
+import { getDashboardLive } from "../api/floodSenserApi";
 
 const RiskMap = () => {
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
-  // THIS PART WILL BE REPLACED BY AN INCIDENT API
-  const incidents = [
-    {
-      level: "CRITICAL",
-      time: "10 min ago",
-      title: "Levee Breach Reported",
-      description:
-        "Sector 4, structural integrity compromised. Immediate evacuation recommended.",
-      type: "critical",
-    },
-    {
-      level: "WARNING",
-      time: "45 min ago",
-      title: "Power Outage",
-      description:
-        "Community Shelter B operating on backup generators. 4 hours fuel remaining.",
-      type: "warning",
-    },
-    {
-      level: "UPDATE",
-      time: "1 hr ago",
-      title: "Rescue Team Deployment",
-      description:
-        "Team Alpha successfully reached stranded residents in Zone 2.",
-      type: "update",
-    },
-    {
-      level: "CRITICAL",
-      time: "2 hrs ago",
-      title: "Main Highway Flooded",
-      description:
-        "Route 66 impassable. Rerouting all emergency traffic to Route 9.",
-      type: "critical",
-    },
-  ];
+  // Fetch live dashboard data
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDashboard = async () => {
+      try {
+        const data = await getDashboardLive();
+
+        if (isMounted) {
+          setDashboard(data);
+          setError(null);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard:", err);
+
+        if (isMounted) {
+          setError(err.message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Initial request
+    loadDashboard();
+
+    // Refresh every 30 seconds
+    const interval = setInterval(loadDashboard, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const incidentStyles = {
     critical: {
@@ -71,6 +77,68 @@ const RiskMap = () => {
     },
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#faf9fd]">
+        <div className="text-center">
+          <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+          <p className="text-sm font-medium text-gray-600">
+            Loading Flood-Sense data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !dashboard) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#faf9fd]">
+        <div className="max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+          <TriangleAlert size={32} className="mx-auto mb-3 text-red-600" />
+
+          <h2 className="text-lg font-semibold text-red-700">
+            Unable to connect to Flood-Sense
+          </h2>
+
+          <p className="mt-2 text-sm text-red-600">
+            {error || "No dashboard data received from the backend."}
+          </p>
+
+          <p className="mt-4 text-xs text-gray-500">
+            Make sure the FastAPI server is running on port 8000.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const kpis = dashboard.kpi_metrics || {};
+  const alert = dashboard.alert || {};
+
+  // Convert backend incidents into the format used by the existing UI
+  const incidents = (dashboard.active_incidents || []).map((incident) => {
+    const severity = (incident.severity || "").toUpperCase();
+
+    let type = "update";
+
+    if (severity.includes("CRITICAL")) {
+      type = "critical";
+    } else if (severity.includes("WARNING") || severity.includes("HIGH")) {
+      type = "warning";
+    }
+
+    return {
+      id: incident.id,
+      level: incident.severity,
+      time: incident.timestamp,
+      title: incident.title,
+      description: `${incident.status}. ${incident.details}`,
+      type,
+    };
+  });
+
   return (
     <div className="min-h-screen bg-[#faf9fd] text-[#1a1c1e]">
       {/* ================= MAIN ================= */}
@@ -83,14 +151,14 @@ const RiskMap = () => {
             </h2>
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="h-3 w-3 animate-pulse rounded-full bg-red-600 [animation-duration:0.9s]"></span>
+              <span className="h-3 w-3 animate-pulse rounded-full bg-red-600 [animation-duration:0.9s]" />
 
               <span className="text-sm font-bold text-red-600">
                 LIVE DATA ACTIVE
               </span>
 
               <span className="text-sm text-gray-500">
-                | Last updated: Today, 14:32 Local Time
+                | Last updated: {dashboard.last_updated}
               </span>
             </div>
           </div>
@@ -108,14 +176,17 @@ const RiskMap = () => {
 
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Users size={20} className="text-red-600" />
-              Total Affected Population
+              {kpis.total_affected_population?.title ||
+                "Total Affected Population"}
             </div>
 
-            <div className="text-4xl font-bold text-[#002045]">42.5k</div>
+            <div className="text-4xl font-bold text-[#002045]">
+              {kpis.total_affected_population?.value ?? "--"}
+            </div>
 
             <div className="flex items-center gap-1 text-xs font-semibold text-red-600">
               <TrendingUp size={16} />
-              +1.2k since 08:00
+              {kpis.total_affected_population?.trend || "--"}
             </div>
           </div>
 
@@ -125,14 +196,16 @@ const RiskMap = () => {
 
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <TriangleAlert size={20} className="text-red-600" />
-              Active High-Risk Zones
+              {kpis.active_high_risk_zones?.title || "Active High Risk Zones"}
             </div>
 
-            <div className="text-4xl font-bold text-[#002045]">18</div>
+            <div className="text-4xl font-bold text-[#002045]">
+              {kpis.active_high_risk_zones?.value ?? "--"}
+            </div>
 
             <div className="flex items-center gap-1 text-xs font-semibold text-red-600">
               <TriangleAlert size={16} />
-              Critical Level Reached in 3 Zones
+              {kpis.active_high_risk_zones?.subtext || "--"}
             </div>
           </div>
 
@@ -142,14 +215,16 @@ const RiskMap = () => {
 
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Truck size={20} className="text-blue-600" />
-              Dispatched Rescue Teams
+              {kpis.dispatched_rescue_teams?.title || "Dispatched Rescue Teams"}
             </div>
 
-            <div className="text-4xl font-bold text-[#002045]">124</div>
+            <div className="text-4xl font-bold text-[#002045]">
+              {kpis.dispatched_rescue_teams?.value ?? "--"}
+            </div>
 
             <div className="flex items-center gap-1 text-xs font-semibold text-blue-600">
               <CheckCircle size={16} />
-              92% Deployment Rate
+              {kpis.dispatched_rescue_teams?.subtext || "--"}
             </div>
           </div>
 
@@ -159,13 +234,40 @@ const RiskMap = () => {
 
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <House size={20} className="text-orange-600" />
-              Shelter Occupancy
+              {kpis.shelter_occupancy?.title || "Shelter Occupancy"}
             </div>
 
-            <div className="text-4xl font-bold text-[#002045]">78%</div>
+            <div className="text-4xl font-bold text-[#002045]">
+              {kpis.shelter_occupancy?.value ?? "--"}
+            </div>
 
             <div className="flex items-center gap-1 text-xs font-semibold text-orange-600">
-              <Info size={16} />4 Shelters Nearing Capacity
+              <Info size={16} />
+              {kpis.shelter_occupancy?.subtext || "--"}
+            </div>
+          </div>
+        </div>
+
+        {/* ================= ALERT ================= */}
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-3">
+            <TriangleAlert size={22} className="mt-0.5 shrink-0 text-red-600" />
+
+            <div>
+              <div className="text-sm font-bold text-red-700">
+                {alert.tier || "ALERT"}
+              </div>
+
+              <p className="mt-1 text-sm text-red-700">
+                {alert.description || "No alert information available."}
+              </p>
+
+              <div className="mt-2 text-xs text-red-600">
+                Current water level:{" "}
+                <strong>{alert.current_water_level_m ?? "--"} m</strong>
+                {" · "}
+                Danger level: <strong>{alert.danger_level_m ?? "--"} m</strong>
+              </div>
             </div>
           </div>
         </div>
@@ -196,9 +298,14 @@ const RiskMap = () => {
 
             {/* Map */}
             <div className="relative min-h-[450px] flex-1 bg-gray-200">
-              {<FloodMap />}
+              <FloodMap
+                dashboard={dashboard}
+                selectedIncidentId={selectedIncidentId}
+                onIncidentSelect={setSelectedIncidentId}
+              />
+
               {/* Map Legend */}
-              <div className="absolute z-[1000] bottom-4 left-4 w-48 rounded-lg border border-gray-300 bg-white p-4 shadow-md">
+              <div className="absolute bottom-4 left-4 z-[1000] w-48 rounded-lg border border-gray-300 bg-white p-4 shadow-md">
                 <h4 className="mb-2 text-sm font-bold">Legend</h4>
 
                 <div className="space-y-2 text-xs">
@@ -236,34 +343,46 @@ const RiskMap = () => {
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {incidents.map((incident, index) => {
-                const style = incidentStyles[incident.type];
+              {incidents.length === 0 ? (
+                <div className="py-8 text-center text-sm text-gray-500">
+                  No active incidents.
+                </div>
+              ) : (
+                incidents.map((incident) => {
+                  const style =
+                    incidentStyles[incident.type] || incidentStyles.update;
 
-                return (
-                  <div
-                    key={index}
-                    className={`rounded-r-lg border-l-4 ${style.border} ${style.bg} p-3`}
-                  >
-                    <div className="mb-1 flex items-start justify-between">
-                      <span className={`text-xs font-bold ${style.text}`}>
-                        {incident.level}
-                      </span>
+                  return (
+                    <div
+                      key={incident.id}
+                      onClick={() => setSelectedIncidentId(incident.id)}
+                      className={`cursor-pointer rounded-r-lg border-l-4 ${style.border} ${style.bg} p-3 transition hover:shadow-md ${
+                        selectedIncidentId === incident.id
+                          ? "ring-2 ring-blue-500"
+                          : ""
+                      }`}
+                    >
+                      <div className="mb-1 flex items-start justify-between gap-2">
+                        <span className={`text-xs font-bold ${style.text}`}>
+                          {incident.level}
+                        </span>
 
-                      <span className="text-xs text-gray-500">
-                        {incident.time}
-                      </span>
+                        <span className="text-xs text-gray-500">
+                          {incident.time}
+                        </span>
+                      </div>
+
+                      <h4 className="text-sm font-bold text-gray-900">
+                        {incident.title}
+                      </h4>
+
+                      <p className="mt-1 text-sm leading-5 text-gray-500">
+                        {incident.description}
+                      </p>
                     </div>
-
-                    <h4 className="text-sm font-bold text-gray-900">
-                      {incident.title}
-                    </h4>
-
-                    <p className="mt-1 text-sm leading-5 text-gray-500">
-                      {incident.description}
-                    </p>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

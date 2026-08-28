@@ -94,37 +94,61 @@ class ExposureAnalyzer:
 
         # 7. Synthesize Active Incidents Stream (as shown in dashboard)
         incidents = [
-            {
-                "id": "INC-2026-081",
-                "title": "NH-10 Mile 29 Inundation & Debris Risk",
-                "severity": "CRITICAL" if tier in ["WARNING", "ALERT"] else "ADVISORY",
-                "severity_color": "#ef4444" if tier in ["WARNING", "ALERT"] else "#eab308",
-                "location": "NH-10 Corrdior (Melli -> Teesta Bazaar)",
-                "timestamp": "12 min ago",
-                "status": "Road Transit Restricted by Traffic Police",
-                "details": f"{impact['threatened_nh10_km']} km of NH-10 highway currently within high flood susceptibility zone."
-            },
-            {
-                "id": "INC-2026-082",
-                "title": "Melli Lower Bazaar Riverbank Surge",
-                "severity": "HIGH ALERT" if tier == "WARNING" else "MONITORING",
-                "severity_color": "#f97316" if tier == "WARNING" else "#3b82f6",
-                "location": "Melli Municipal Ward 2 & 4",
-                "timestamp": "28 min ago",
-                "status": "SDRF Evacuation Advisory Active",
-                "details": f"{impact['threatened_buildings_count']} structures in river proximity alerted."
-            },
-            {
-                "id": "INC-2026-083",
-                "title": "Teesta Bridge Structural Clearance Watch",
-                "severity": "ADVISORY",
-                "severity_color": "#eab308",
-                "location": "Melli Bridge Pier #3",
-                "timestamp": "1 hr ago",
-                "status": "Hydraulic Freeboard: 3.2m above current stage",
-                "details": "CWC hydraulic engineer on-site monitoring velocity and debris accumulation."
-            }
-        ]
+    {
+        "id": "INC-2026-081",
+        "title": "NH-10 Mile 29 Inundation & Debris Risk",
+        "severity": "CRITICAL" if tier in ["WARNING", "ALERT"] else "ADVISORY",
+        "severity_color": "#ef4444" if tier in ["WARNING", "ALERT"] else "#eab308",
+        "location": "NH-10 Corridor (Melli -> Teesta Bazaar)",
+
+        # Melli / NH-10 corridor
+        "latitude": 27.1695,
+        "longitude": 88.4935,
+
+        "timestamp": "12 min ago",
+        "status": "Road Transit Restricted by Traffic Police",
+        "details": (
+            f"{impact['threatened_nh10_km']} km of NH-10 highway "
+            "currently within high flood susceptibility zone."
+        )
+    },
+    {
+        "id": "INC-2026-082",
+        "title": "Melli Lower Bazaar Riverbank Surge",
+        "severity": "HIGH ALERT" if tier == "WARNING" else "MONITORING",
+        "severity_color": "#f97316" if tier == "WARNING" else "#3b82f6",
+        "location": "Melli Municipal Ward 2 & 4",
+
+        # Lower Melli Bazaar / Teesta riverbank
+        "latitude": 27.1598,
+        "longitude": 88.4898,
+
+        "timestamp": "28 min ago",
+        "status": "SDRF Evacuation Advisory Active",
+        "details": (
+            f"{impact['threatened_buildings_count']} structures "
+            "in river proximity alerted."
+        )
+    },
+    {
+        "id": "INC-2026-083",
+        "title": "Teesta Bridge Structural Clearance Watch",
+        "severity": "ADVISORY",
+        "severity_color": "#eab308",
+        "location": "Melli Bridge Pier #3",
+
+        # Teesta Bridge area
+        "latitude": 27.1738,
+        "longitude": 88.4972,
+
+        "timestamp": "1 hr ago",
+        "status": "Hydraulic Freeboard: 3.2m above current stage",
+        "details": (
+            "CWC hydraulic engineer on-site monitoring velocity "
+            "and debris accumulation."
+        )
+    }
+]
 
         total_elapsed_ms = round((time.time() - t0) * 1000, 1)
 

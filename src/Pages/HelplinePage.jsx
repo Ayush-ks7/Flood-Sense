@@ -273,7 +273,7 @@ const HelplinePage = () => {
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#ba1a1a] px-8 py-4 text-2xl font-bold text-white shadow-lg transition-transform hover:scale-105"
             >
               <span className="material-symbols-outlined">call</span>
-              Dial 911
+              Dial 	1077
             </a>
           </div>
         </section>
@@ -458,7 +458,7 @@ const HelplinePage = () => {
           <span className="text-2xl font-bold">FloodGuard</span>
 
           <p className="text-base leading-6 text-white/80">
-            © 2024 FloodGuard Emergency Management Systems. All rights reserved.
+            © 2026 FloodGuard Emergency Management Systems. All rights reserved.
           </p>
         </div>
 
