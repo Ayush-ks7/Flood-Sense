@@ -1,6 +1,4 @@
--- ============================================================================
--- SERENITY / FloodGuard — Spatiotemporal Flood Risk & Early Warning Platform
--- PostGIS Spatial Database Schema for Melli & Teesta River Corridor, Sikkim
+-- Flood Sense — Spatiotemporal Flood Risk & Early Warning Platform
 -- ============================================================================
 
 -- 1. Enable PostGIS Extensions

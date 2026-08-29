@@ -104,14 +104,11 @@ class LiveTelemetryService:
         else:
             self.master_df = pd.DataFrame()
 
-        # Pointer to current time step (defaults to high-water monsoon flood event index for realistic operational cockpit)
-        # Find an active flood index in master df
+        # Replay begins at the most recent verified Melli observation. Never
+        # select a flood event merely to make the dashboard look active.
         if len(self.master_df) > 0 and 'melli_water_level_m' in self.master_df.columns:
-            flood_mask = self.master_df['melli_water_level_m'] >= 225.2
-            if flood_mask.sum() > 0:
-                self.current_idx = int(self.master_df[flood_mask].index[10]) # Representative active flood event
-            else:
-                self.current_idx = len(self.master_df) - 100
+            valid_melli = self.master_df.index[self.master_df['melli_water_level_m'].notna()]
+            self.current_idx = int(valid_melli[-1]) if len(valid_melli) else 0
         else:
             self.current_idx = 0
 
@@ -129,43 +126,47 @@ class LiveTelemetryService:
         live_khan_cwc = self.fetch_live_cwc_from_api(self.KHANITAR_CWC_CODE)
 
         if len(self.master_df) == 0:
-            # Fallback nominal values
-            melli_wl = live_melli_cwc if live_melli_cwc is not None else 224.85
-            khan_wl = live_khan_cwc if live_khan_cwc is not None else 294.30
-            r1 = live_rain.get('rain_prev_1d', 68.0)
-            r3 = live_rain.get('rain_prev_3d', 132.0)
-            r7 = live_rain.get('rain_prev_7d', 210.0)
+            raise RuntimeError(
+                "Verified telemetry history is required to calculate model features; no fallback values are published."
+            )
 
-            return {
-                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "melli_water_level_m": melli_wl,
-                "melli_rise_1h": 0.42,
-                "khanitar_water_level_m": khan_wl,
-                "khanitar_rise_1h": 0.65,
-                "rain_prev_1d": r1,
-                "rain_prev_3d": r3,
-                "rain_prev_7d": r7,
-                "data_source": "LIVE_CWC_AND_IMD_APIS",
-                "cwc_station_id": "024-MBDNG (Melli)",
-                "cwc_basin": "Teesta Basin, Sikkim"
-            }
+        history = self.master_df.iloc[:self.current_idx + 1]
+
+        def latest_observed(column: str) -> float:
+            observed = history[column].dropna() if column in history else pd.Series(dtype=float)
+            if observed.empty:
+                observed = self.master_df[column].dropna() if column in self.master_df else pd.Series(dtype=float)
+            if observed.empty:
+                return 0.0
+            return float(observed.iloc[-1])
+
+        def observed_rise(column: str) -> float:
+            observed = history[column].dropna() if column in history else pd.Series(dtype=float)
+            if len(observed) < 2:
+                observed = self.master_df[column].dropna() if column in self.master_df else pd.Series(dtype=float)
+            if len(observed) < 2:
+                return 0.0
+            return float(observed.iloc[-1] - observed.iloc[-2])
 
         row = self.master_df.iloc[self.current_idx]
-        
-        # Calculate rate of rise from previous hour
-        prev_row = self.master_df.iloc[max(0, self.current_idx - 1)]
-        melli_rise = float(row['melli_water_level_m'] - prev_row['melli_water_level_m'])
-        khanitar_rise = float(row.get('khanitar_water_level_m', 294.0) - prev_row.get('khanitar_water_level_m', 294.0))
+        melli_rise = observed_rise('melli_water_level_m')
+        khanitar_rise = observed_rise('khanitar_water_level_m')
 
         # Use live values if available
-        melli_wl = live_melli_cwc if live_melli_cwc is not None else round(float(row['melli_water_level_m']), 2)
-        khan_wl = live_khan_cwc if live_khan_cwc is not None else round(float(row.get('khanitar_water_level_m', 294.0)), 2)
-        r1 = live_rain.get('rain_prev_1d', round(float(row.get('rain_prev_1d', 45.0)), 1))
-        r3 = live_rain.get('rain_prev_3d', round(float(row.get('rain_prev_3d', 90.0)), 1))
-        r7 = live_rain.get('rain_prev_7d', round(float(row.get('rain_prev_7d', 160.0)), 1))
+        melli_wl = live_melli_cwc if live_melli_cwc is not None else latest_observed('melli_water_level_m')
+        khan_wl = live_khan_cwc if live_khan_cwc is not None else latest_observed('khanitar_water_level_m')
+        r1 = live_rain.get('rain_prev_1d', latest_observed('rain_prev_1d'))
+        r3 = live_rain.get('rain_prev_3d', latest_observed('rain_prev_3d'))
+        r7 = live_rain.get('rain_prev_7d', latest_observed('rain_prev_7d'))
+
+        is_fully_live = (
+            live_melli_cwc is not None
+            and live_khan_cwc is not None
+            and all(key in live_rain for key in ('rain_prev_1d', 'rain_prev_3d', 'rain_prev_7d'))
+        )
 
         return {
-            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") if live_melli_cwc else str(row['timestamp']),
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") if is_fully_live else str(row['timestamp']),
             "melli_water_level_m": melli_wl,
             "melli_rise_1h": round(melli_rise, 2),
             "khanitar_water_level_m": khan_wl,
@@ -173,12 +174,13 @@ class LiveTelemetryService:
             "rain_prev_1d": r1,
             "rain_prev_3d": r3,
             "rain_prev_7d": r7,
-            "data_source": "LIVE_CWC_AND_METEOROLOGICAL_NETWORK" if live_melli_cwc else "CWC_INDIA_WRIS_TELEMETRY_STREAM",
+            "data_source": "LIVE_CWC_AND_METEOROLOGICAL_NETWORK" if is_fully_live else "VERIFIED_HISTORICAL_TELEMETRY_REPLAY",
+            "data_mode": "LIVE" if is_fully_live else "HISTORICAL_REPLAY",
             "cwc_station_id": "024-MBDNG (Melli)",
             "cwc_basin": "Teesta River Basin, Sikkim"
         }
 
-    def get_rolling_72h_sequence(self) -> Tuple[np.ndarray, List[Dict[str, Any]]]:
+    def get_rolling_72h_sequence(self) -> Tuple[np.ndarray, list[Dict[str, Any]]]:
         """
         Builds the 72-hour historical feature matrix (1, 72, 11) for ONNX Residual Attention LSTM.
         Returns:
@@ -202,19 +204,25 @@ class LiveTelemetryService:
             elif len(slice_df) > 72:
                 slice_df = slice_df.iloc[-72:]
         else:
-            # Synthetic 72h sequence starting from 223.5m climbing to current reading
-            cur = self.get_latest_reading()
-            t_range = pd.date_range(end=pd.Timestamp.now(), periods=72, freq='h')
-            melli_arr = np.linspace(cur['melli_water_level_m'] - 1.8, cur['melli_water_level_m'], 72)
-            khan_arr = np.linspace(cur['khanitar_water_level_m'] - 2.5, cur['khanitar_water_level_m'], 72)
-            slice_df = pd.DataFrame({
-                'timestamp': t_range,
-                'melli_water_level_m': melli_arr,
-                'khanitar_water_level_m': khan_arr,
-                'rain_prev_1d': [cur['rain_prev_1d']] * 72,
-                'rain_prev_3d': [cur['rain_prev_3d']] * 72,
-                'rain_prev_7d': [cur['rain_prev_7d']] * 72,
-            })
+            raise RuntimeError(
+                "At least 10 verified telemetry observations are required for a model forecast."
+            )
+
+        # CWC gauge streams are asynchronous, so a synchronized historical row
+        # can legitimately be missing one station. Carry the nearest verified
+        # observation within this 72-step window; do not create nominal values.
+        feature_columns = [
+            'melli_water_level_m', 'khanitar_water_level_m',
+            'rain_prev_1d', 'rain_prev_3d', 'rain_prev_7d',
+        ]
+        slice_df[feature_columns] = slice_df[feature_columns].ffill().bfill()
+        if slice_df[feature_columns].isna().any().any():
+            missing = slice_df[feature_columns].columns[
+                slice_df[feature_columns].isna().any()
+            ].tolist()
+            raise RuntimeError(
+                f"Verified telemetry is incomplete for model features: {', '.join(missing)}."
+            )
 
         # Build feature matrix (1, 72, 9 raw features)
         # cols: 0: melli_wl, 1: melli_rise, 2: khan_wl, 3: khan_rise, 4: rain_12h, 5: rain_24h, 6: rain_1d, 7: rain_3d, 8: rain_7d
@@ -233,6 +241,8 @@ class LiveTelemetryService:
         api_f = 0.5 * seq_raw[:, :, 6:7] + 0.3 * seq_raw[:, :, 7:8] + 0.2 * seq_raw[:, :, 8:9]
         khan_n = (seq_raw[:, :, 2:3] - 290.0) / 10.0
         seq_enhanced = np.concatenate([seq_raw, api_f, khan_n], axis=-1).astype(np.float32)
+        if not np.isfinite(seq_enhanced).all():
+            raise RuntimeError("Model feature window contains non-finite telemetry values.")
 
         history_series = []
         for _, r in slice_df.iterrows():

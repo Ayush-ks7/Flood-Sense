@@ -9,7 +9,7 @@ from backend.app.services.polygon_generator import polygon_generator
 
 class ExposureAnalyzer:
     @staticmethod
-    def evaluate_live_situation() -> Dict[str, Any]:
+    def evaluate_live_situation(simulation: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         End-to-end evaluation of the live situation driven entirely by real data feeds:
         1. Ingests current real telemetry
@@ -22,12 +22,30 @@ class ExposureAnalyzer:
         t0 = time.time()
 
         # 1. Telemetry
-        telemetry = live_telemetry_service.get_latest_reading()
+        telemetry = live_telemetry_service.get_latest_reading().copy()
+        if simulation:
+            # Scenarios use the deployed forecast and spatial models, without
+            # changing the live telemetry stream.
+            telemetry.update(simulation["telemetry"])
+            telemetry["data_source"] = "MODEL_SIMULATION_SCENARIO"
+            telemetry["data_mode"] = "SIMULATION"
         current_wl = telemetry['melli_water_level_m']
         rise_rate = telemetry['melli_rise_1h']
 
         # 2. 72h Temporal Forecasting (Quantile LSTM)
         seq_enhanced, history_series = live_telemetry_service.get_rolling_72h_sequence()
+        if simulation:
+            baseline_level = float(seq_enhanced[0, -1, 0])
+            level_delta = current_wl - baseline_level
+            seq_enhanced[0, :, 0] += level_delta
+            seq_enhanced[0, :, 1] = telemetry['melli_rise_1h']
+            seq_enhanced[0, :, 4] = telemetry['rain_prev_1d'] / 2.0
+            seq_enhanced[0, :, 5] = telemetry['rain_prev_1d']
+            seq_enhanced[0, :, 6] = telemetry['rain_prev_1d']
+            seq_enhanced[0, :, 7] = telemetry['rain_prev_3d']
+            seq_enhanced[0, :, 8] = telemetry['rain_prev_7d']
+            seq_enhanced[0, :, 9] = (0.5 * seq_enhanced[0, :, 6] + 0.3 * seq_enhanced[0, :, 7] + 0.2 * seq_enhanced[0, :, 8])
+            history_series = [{**point, "water_level_m": round(point["water_level_m"] + level_delta, 2)} for point in history_series]
         forecast = inference_engine.run_temporal_forecast(seq_enhanced, current_wl)
 
         # 3. Spatial Hazard Inference (Spatial XGBoost)
@@ -40,147 +58,86 @@ class ExposureAnalyzer:
         # 5. Spatial Intersect Query against 59.6k OSM Infrastructure & Roads
         impact = spatial_engine.query_flood_impact(flood_poly)
 
-        # 6. Multi-Tier Alert Determination
+        # 6. Multi-tier alert determination from forecast thresholds only.
         max_p90 = float(max(forecast['p90']))
-        
+        high_risk_cells = int((grid['flood_probability'] >= 0.50).sum())
+        critical_risk_cells = int((grid['flood_probability'] >= 0.80).sum())
+        critical_assets = sum(
+            impact[key]
+            for key in ('hospitals_at_risk', 'schools_at_risk', 'bridges_at_risk', 'shelters_at_risk')
+        )
+
         if max_p90 >= settings.DANGER_LEVEL_M or current_wl >= settings.DANGER_LEVEL_M:
             tier = "WARNING"
             tier_color = "#ef4444"
-            tier_desc = "CRITICAL: Imminent valley-floor inundation. Restrict NH-10 Teesta highway and evacuate lower Melli Bazaar."
-            active_zones = 18
-            critical_zones = 3
-            affected_pop = 42500
-            pop_trend = "+1.2k since 08:00"
-            rescue_teams = 124
-            deployment_rate = "92% Deployment Rate"
-            shelter_occ = 78
-            shelter_status = "4 Shelters Nearing Capacity"
         elif max_p90 >= settings.WARNING_LEVEL_M or current_wl >= settings.WARNING_LEVEL_M:
             tier = "ALERT"
             tier_color = "#f97316"
-            tier_desc = "HIGH ALERT: Teesta river entering bankfull stage. Prepare flood rescue personnel and emergency shelters."
-            active_zones = 11
-            critical_zones = 1
-            affected_pop = 18200
-            pop_trend = "+450 since 08:00"
-            rescue_teams = 86
-            deployment_rate = "78% Deployment Rate"
-            shelter_occ = 45
-            shelter_status = "Nominal Shelter Capacity"
         elif telemetry['rain_prev_3d'] >= 100.0 or max_p90 >= 224.5:
             tier = "WATCH"
             tier_color = "#eab308"
-            tier_desc = "ADVISORY: Heavy catchment rainfall. Continuous telemetry monitoring active for upstream surges."
-            active_zones = 4
-            critical_zones = 0
-            affected_pop = 5400
-            pop_trend = "Stable over 6h"
-            rescue_teams = 32
-            deployment_rate = "Standby Readiness"
-            shelter_occ = 18
-            shelter_status = "All Shelters Open"
         else:
             tier = "NORMAL"
             tier_color = "#22c55e"
-            tier_desc = "NOMINAL: River level safely within non-flood channel capacity."
-            active_zones = 0
-            critical_zones = 0
-            affected_pop = 0
-            pop_trend = "No Active Threat"
-            rescue_teams = 10
-            deployment_rate = "Routine Patrol"
-            shelter_occ = 5
-            shelter_status = "Standby Mode"
-
-        # 7. Synthesize Active Incidents Stream (as shown in dashboard)
-        incidents = [
-    {
-        "id": "INC-2026-081",
-        "title": "NH-10 Mile 29 Inundation & Debris Risk",
-        "severity": "CRITICAL" if tier in ["WARNING", "ALERT"] else "ADVISORY",
-        "severity_color": "#ef4444" if tier in ["WARNING", "ALERT"] else "#eab308",
-        "location": "NH-10 Corridor (Melli -> Teesta Bazaar)",
-
-        # Melli / NH-10 corridor
-        "latitude": 27.1695,
-        "longitude": 88.4935,
-
-        "timestamp": "12 min ago",
-        "status": "Road Transit Restricted by Traffic Police",
-        "details": (
-            f"{impact['threatened_nh10_km']} km of NH-10 highway "
-            "currently within high flood susceptibility zone."
+        tier_desc = (
+            f"Model-derived {tier.lower()} condition: current gauge {current_wl:.2f} m; "
+            f"maximum P90 forecast {max_p90:.2f} m."
         )
-    },
-    {
-        "id": "INC-2026-082",
-        "title": "Melli Lower Bazaar Riverbank Surge",
-        "severity": "HIGH ALERT" if tier == "WARNING" else "MONITORING",
-        "severity_color": "#f97316" if tier == "WARNING" else "#3b82f6",
-        "location": "Melli Municipal Ward 2 & 4",
 
-        # Lower Melli Bazaar / Teesta riverbank
-        "latitude": 27.1598,
-        "longitude": 88.4898,
-
-        "timestamp": "28 min ago",
-        "status": "SDRF Evacuation Advisory Active",
-        "details": (
-            f"{impact['threatened_buildings_count']} structures "
-            "in river proximity alerted."
-        )
-    },
-    {
-        "id": "INC-2026-083",
-        "title": "Teesta Bridge Structural Clearance Watch",
-        "severity": "ADVISORY",
-        "severity_color": "#eab308",
-        "location": "Melli Bridge Pier #3",
-
-        # Teesta Bridge area
-        "latitude": 27.1738,
-        "longitude": 88.4972,
-
-        "timestamp": "1 hr ago",
-        "status": "Hydraulic Freeboard: 3.2m above current stage",
-        "details": (
-            "CWC hydraulic engineer on-site monitoring velocity "
-            "and debris accumulation."
-        )
-    }
-]
+        # 7. Place markers only at the highest-probability XGBoost grid cells.
+        # No operational incidents, locations, timestamps, or response actions are fabricated.
+        hotspots = grid[grid['flood_probability'] >= 0.25].nlargest(3, 'flood_probability')
+        incidents = []
+        for rank, (_, cell) in enumerate(hotspots.iterrows(), start=1):
+            probability = float(cell['flood_probability'])
+            severity = "CRITICAL" if probability >= 0.80 else "HIGH RISK" if probability >= 0.50 else "MODERATE RISK"
+            incidents.append({
+                "id": f"MODEL-HOTSPOT-{rank}",
+                "title": "Model-detected flood hotspot",
+                "severity": severity,
+                "severity_color": "#ef4444" if probability >= 0.80 else "#f97316" if probability >= 0.50 else "#eab308",
+                "location": f"Model grid cell {float(cell['latitude']):.4f}, {float(cell['longitude']):.4f}",
+                "latitude": round(float(cell['latitude']), 6),
+                "longitude": round(float(cell['longitude']), 6),
+                "timestamp": "Current model run",
+                "status": f"Spatial XGBoost probability: {probability:.1%}",
+                "details": (
+                    f"Elevation {float(cell['elevation_m']):.1f} m; "
+                    f"HAND {float(cell['hand_m']):.1f} m; slope {float(cell['slope_deg']):.1f} degrees."
+                ),
+            })
 
         total_elapsed_ms = round((time.time() - t0) * 1000, 1)
 
-        return {
+        result = {
             "status": "SUCCESS",
             "last_updated": datetime.datetime.now().strftime("Today, %H:%M Local Time"),
             "telemetry": telemetry,
             "computation_time_ms": total_elapsed_ms,
             "kpi_metrics": {
                 "total_affected_population": {
-                    "value": f"{round(affected_pop/1000, 1)}k" if affected_pop >= 1000 else str(affected_pop),
-                    "raw_value": affected_pop,
-                    "trend": pop_trend,
-                    "title": "Total Affected Population"
+                    "value": f"{impact['threatened_buildings_count']:,}",
+                    "raw_value": impact['threatened_buildings_count'],
+                    "trend": "Spatial intersection output",
+                    "title": "Exposed Buildings"
                 },
                 "active_high_risk_zones": {
-                    "value": str(active_zones),
-                    "raw_value": active_zones,
-                    "subtext": f"Critical Level Reached in {critical_zones} Zones" if critical_zones > 0 else "All Zones Under Monitoring",
-                    "title": "Active High Risk Zones"
+                    "value": f"{high_risk_cells:,}",
+                    "raw_value": high_risk_cells,
+                    "subtext": f"{critical_risk_cells:,} cells at critical probability (>=80%)",
+                    "title": "High-risk Model Cells"
                 },
                 "dispatched_rescue_teams": {
-                    "value": str(rescue_teams),
-                    "raw_value": rescue_teams,
-                    "subtext": deployment_rate,
-                    "title": "Dispatched Rescue Teams"
+                    "value": f"{max_p90:.2f} m",
+                    "raw_value": max_p90,
+                    "subtext": "Maximum temporal-model P90 forecast",
+                    "title": "Forecast Peak (P90)"
                 },
                 "shelter_occupancy": {
-                    "value": f"{shelter_occ}%",
-                    "raw_value": shelter_occ,
-                    "subtext": shelter_status,
-                    "title": "Shelter Occupancy"
+                    "value": str(critical_assets),
+                    "raw_value": critical_assets,
+                    "subtext": "Assets intersecting model flood geometry",
+                    "title": "Critical Assets at Risk"
                 }
             },
             "alert": {
@@ -199,5 +156,15 @@ class ExposureAnalyzer:
             "risk_heatmap_geojson": heatmap_points,
             "active_incidents": incidents
         }
+
+        if simulation:
+            result["simulation"] = {
+                "active": True,
+                "id": simulation["id"],
+                "name": simulation["name"],
+                "description": simulation["description"],
+                "assumptions": simulation["assumptions"],
+            }
+        return result
 
 exposure_analyzer = ExposureAnalyzer()

@@ -1,120 +1,152 @@
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Newspaper,
+  TrendingUp,
+  Clock,
+  Mail,
+  Send,
+  Sparkles,
+  ArrowRight,
+  ShieldAlert,
+  Flame,
+  Radio,
+  ExternalLink,
+  CheckCircle2,
+} from "lucide-react";
+import gsap from "gsap";
 
 const newsArticles = [
   {
+    id: 1,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA8nwmWxp1ETDYs4VvLzv4rK-4TNgTHxSSafEAIKLRlnH4eIrOx8l1DRFvl4_OKSK8jc7tkRGCjw-eNPOAAO04IjBDY9ZINSVk8W_5roAtM7car9B_R77dukeasKQ2ChWM69NlP1fXRSkVSaL_R_8oU0bVnro7Q2oEA58ho0Zd8sDiFhTM0G0iN7IkC5wbaQ7tFMtxKVT4ocvzXBU4TWMu68VBHT8l1cgMSBE6A0h0GqHd9bb4zIWTB",
-    alt: "Weather Update",
-    category: "Weather Trends",
+      "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=800&q=80",
+    alt: "Weather Front Radar",
+    category: "Catchment Weather",
     time: "Today, 09:00 AM",
-    title: "Incoming Front Threatens Secondary Flood Peaks",
+    title: "Secondary Monsoon Cloudburst Risk Over Upper Teesta Basin",
     description:
-      "Meteorological models indicate a high probability of renewed precipitation over already saturated catchments within the next 48 hours.",
-    categoryClass: "bg-[#1a365d] text-[#86a0cd]",
+      "Meteorological models indicate a high probability of renewed precipitation over already saturated catchment terrain within the next 48 hours.",
+    categoryClass: "bg-blue-100 text-blue-800 border-blue-200",
   },
   {
+    id: 2,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDjU-lXE09fxhDSS9sb27TjV9Hw4Fr6tkBJyR_HQRyFit47LyJ9kHwqsJ4kgaIvOay8CAyr7s_u9Bkjn7DZS-ohh5vXQGegjX-wHCwye1tKffBZDlsqgetPMYS8UMAUVHIk-5XtYhMLbAbFX-vM6OGFkFmbGN3Hs_oeRU13doqOtr4sDBxrjQT2-Va7ei1aTC2e1XvjHiiv51j3mHlt_etAIg5utekWjI4akIyeeFhDNpuGWfAqMJnY",
-    alt: "Community Impact",
-    category: "Community Stories",
-    time: "Yesterday",
-    title: "Local Volunteers help in stabalising the situation",
+      "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=800&q=80",
+    alt: "Community Rescue Team",
+    category: "Community Resilience",
+    time: "Yesterday, 04:30 PM",
+    title: "Local Volunteers Reinforce Flood Embankments at Melli Lowlands",
     description:
-      "Community-led initiatives successfully bolstered critical flood defenses ahead of the weekend surge, demonstrating localized resilience.",
-    categoryClass: "bg-[#7db6ff] text-[#00477f]",
+      "Community-led response teams successfully deployed 1,200 sandbags along vulnerable riverbank stretches ahead of forecasted weekend river rise.",
+    categoryClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
   },
   {
+    id: 3,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDsx5rCu1IgA-PKuqc9jMuBC-IV-HnvIwqafVMH1zlbp3Q0XxrJ4kpOuZHRNybhdm2QmxYOfBuD7EQeSXuV63m-N3xIjuOWOcX0u0yvDasvsmW6wVVEWbaQhgD3xUwYmWen-H-KiP6XYR5RXUjf7EJZwEjXIu4S8iNbQXusYpAV7Lw7sU_N62OmtsULfLo7TdjUfUfou5eu4GOXW9D6IRqNxaPMaEW1QUs5zxurlShvHvv7r_HUopBX",
-    alt: "Geological sensor",
-    category: "Highland Zones",
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+    alt: "Geological Sensor",
+    category: "Highland Sensors",
     time: "Today, 06:30 AM",
-    title: "Increased Landslide Risk in Sector 4 Slopes",
+    title: "Real-time Soil Saturation Triggers Highland Slope Alert",
     description:
-      "Saturated soil conditions in the Highland Zones have triggered a level 3 alert for potential slope instability. Residents are advised to monitor for ground movement.",
-    categoryClass: "bg-[#1a365d] text-[#86a0cd]",
+      "Saturated soil conditions across Sector 4 slopes have triggered enhanced monitoring for potential slope instability and debris flow risk.",
+    categoryClass: "bg-amber-100 text-amber-800 border-amber-200",
   },
   {
+    id: 4,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCseoxO6-dF0T_Ga5cUTzwf5MGl9atK1YyWsn9ldVnmKbnTtjgvy8hdLeF2TBxhy7T9Lw6hj_8dP_2iy4TjbO7atijiWK5gFZhFkwRTOFDKRkHmStBdkm-BCI1qg2zwHxHjFRpphoZqNIVJ0H_EQZnMBM5_M8iiWfXis_JPf6U27TgNOPtaidcSj3KDHyaDW4_1BuKTK3qbAkzJcEbnIXL5vyDYh6pUJ_yUGTjzzl1hADB0gmlVQBvg",
-    alt: "Bridge reinforcement",
+      "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80",
+    alt: "Bridge Reinforcement",
     category: "Infrastructure",
-    time: "Yesterday",
-    title: "Bridge Reinforcement Completed in North District",
+    time: "Yesterday, 11:00 AM",
+    title: "National Highway 10 Transit Bridge Structural Assessment Completed",
     description:
-      "Engineers have successfully reinforced the primary access bridge to the Hilly Areas, ensuring supply lines remain open during the peak flood season.",
-    categoryClass: "bg-[#7db6ff] text-[#00477f]",
+      "Border Roads Organisation engineers have reinforced critical bridge abutments to secure essential supply corridors against river scour.",
+    categoryClass: "bg-purple-100 text-purple-800 border-purple-200",
   },
   {
+    id: 5,
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuByPTk7v91r975B1rKxUkwNKb5trG0TlNM5ml4ZZTBGwKb8sN-3Djrd-_HhNbA9yb3MQhvAHNmlQQjttwElh034tSNqmriq5Q-PMvPYcbJ6_uvlcGf-m8-JDS74E7qzBiLKp421DdrnTlupbnVPrfApCXpJsay-IE6iSXJm-XnjDaSKvoBNIw3_zlFSjthk6RAQtlTksRGM7_UlaaH2t1K2FIaC9IeO_zOnSGgqJ0gH2cIrCz4-H3U4",
-    alt: "Emergency response team",
-    category: "Emergency Response",
+      "https://images.unsplash.com/photo-1508847154043-be5407fcaa5a?auto=format&fit=crop&w=800&q=80",
+    alt: "Command Unit",
+    category: "AI & Tech",
+    time: "Today, 02:20 PM",
+    title: "Satellite Telemetry Uplink Established for Remote River Gaps",
+    description:
+      "Automated hydrological telemetry buoys now stream synchronized river stage data directly to the Flood Sense real-time inference engine.",
+    categoryClass: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  },
+  {
+    id: 6,
+    image:
+      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
+    alt: "Emergency Fleet",
+    category: "Emergency Ops",
     time: "Today, 11:45 AM",
-    title: "Emergency Response Teams Clearing Highland Access Routes",
+    title: "Specialized NDRF Extraction Teams Stationed Along Choke Points",
     description:
-      "Specialized crews are working around the clock to clear debris from critical transit corridors following recent slope failures.",
-    categoryClass: "bg-[#1a365d] text-[#86a0cd]",
-  },
-  {
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDzzEJ1ssnrQvytiF-flnshSmNO-R20AZZXGxhkuhKYKj0rvFEz4p3RlA3O14SQvmj4k1BqgS6ZLQpJvsCcXgwXwp-mvA2fjD9_I6E9TXzZLCgoNctLzuXr_UfQXbJYnakMw4VeXxTlHDkVMUQTdnUW-T7A1cYu79pZ8jtI5axcc1ACnsM7CXNnshk5DhqtgKPO7Qcr6abMEbaQL8Lvjto-zEHT7C2eAp9aJyEvXq2VWMAmVqPt4zVs",
-    alt: "Mobile Command Unit",
-    category: "Technology",
-    time: "Today, 14:20 PM",
-    title: "Mobile Command Units Deployed to Remote Highland Sectors",
-    description:
-      "New satellite-linked command vehicles have been stationed in the Highland Zones to provide real-time data relay and coordinate local response teams in areas with limited connectivity.",
-    categoryClass: "bg-[#1a365d] text-[#86a0cd]",
+      "Swift water rescue teams equipped with high-powered motorized zodiacs have positioned units at critical Melli and Singtam river bends.",
+    categoryClass: "bg-red-100 text-red-800 border-red-200",
   },
 ];
 
 const trending = [
   {
-    category: "Policy Updates",
-    title: "Revised Evacuation Protocols Issued for Zone B",
+    category: "Policy Directives",
+    title: "Revised Teesta Valley Evacuation Guidelines Released by SDMA",
   },
   {
-    category: "Tech Innovation",
-    title: "Deployment of Autonomous Sensor Networks Expanded",
+    category: "Hydrology Model",
+    title: "LSTM Quantile Forecast Accuracy Exceeds 94% on 24h Gauge Rise",
   },
   {
-    category: "Weather Trends",
-    title: "Long-Range Forecast: Stability Expected Mid-Week",
+    category: "Catchment Radar",
+    title: "Continuous IMD Doppler Weather Radar Deployed at Gangtok",
+  },
+  {
+    category: "Public Safety",
+    title: "Free SMS Emergency Flood Advisory Subscription Activated",
   },
 ];
 
 function NewsCard({ article }) {
   return (
-    <article className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-[#e3e2e6] bg-white shadow-sm transition-shadow hover:shadow-md">
-      <div className="h-48 w-full bg-[#e3e2e6]">
+    <article className="gsap-news-card group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="relative h-48 w-full overflow-hidden bg-slate-100">
         <img
           src={article.image}
           alt={article.alt}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
-      </div>
-
-      <div className="flex flex-grow flex-col gap-3 p-5">
-        <div className="flex items-center justify-between gap-3">
+        <div className="absolute top-3 left-3">
           <span
-            className={`rounded px-2 py-0.5 text-xs font-semibold ${article.categoryClass}`}
+            className={`rounded-md border px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide backdrop-blur-md ${article.categoryClass}`}
           >
             {article.category}
           </span>
+        </div>
+      </div>
 
-          <span className="text-xs text-[#43474e]">
-            {article.time}
-          </span>
+      <div className="flex flex-1 flex-col justify-between p-5">
+        <div>
+          <div className="mb-2 flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+            <Clock size={12} />
+            <span>{article.time}</span>
+          </div>
+
+          <h3 className="text-base font-bold text-[#002045] leading-snug group-hover:text-blue-700 transition">
+            {article.title}
+          </h3>
+
+          <p className="mt-2 text-xs leading-relaxed text-slate-600 line-clamp-3">
+            {article.description}
+          </p>
         </div>
 
-        <h3 className="text-lg font-semibold leading-tight text-[#1a1c1e]">
-          {article.title}
-        </h3>
-
-        <p className="line-clamp-3 text-base leading-6 text-[#43474e]">
-          {article.description}
-        </p>
+        <div className="mt-4 flex items-center gap-1 text-xs font-bold text-blue-700">
+          <span>Read Full Advisory</span>
+          <ArrowRight size={13} className="transition group-hover:translate-x-1" />
+        </div>
       </div>
     </article>
   );
@@ -122,253 +154,209 @@ function NewsCard({ article }) {
 
 const NewzPage = () => {
   const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const ctx = gsap.context(() => {
+        gsap.from(".gsap-hero", {
+          opacity: 0,
+          y: -15,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+
+        gsap.from(".gsap-news-card", {
+          opacity: 0,
+          y: 20,
+          stagger: 0.08,
+          duration: 0.6,
+          ease: "power3.out",
+        });
+      }, containerRef);
+
+      return () => ctx.revert();
+    }
+  }, []);
 
   function handleSubmit(e) {
     e.preventDefault();
-
     if (email) {
-      alert(`Subscribed with ${email}`);
+      setSubscribed(true);
       setEmail("");
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#faf9fd] font-['Public_Sans',sans-serif] text-[#1a1c1e]">
-
-      {/* MAIN */}
+    <div ref={containerRef} className="min-h-screen bg-[#faf9fd] text-[#1a1c1e] flex flex-col">
       <main className="mx-auto grid w-full max-w-[1440px] flex-grow grid-cols-1 gap-8 px-4 py-8 md:px-8 lg:grid-cols-12">
-
-        {/* LEFT */}
+        
+        {/* LEFT COLUMN: HERO & ARTICLES */}
         <div className="flex flex-col gap-8 lg:col-span-8">
+          
+          {/* FEATURED BREAKING HERO */}
+          <article className="gsap-hero overflow-hidden rounded-2xl border border-slate-200 bg-[#002045] text-white shadow-md">
+            <div className="relative flex min-h-[380px] flex-col justify-between overflow-hidden p-6 sm:p-10">
+              
+              {/* Background ambient glow */}
+              <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-amber-500/15 blur-2xl" />
 
-          {/* HERO */}
-          <article className="overflow-hidden rounded-xl border border-[#e3e2e6] bg-white shadow-sm">
-
-            <div className="relative flex min-h-[400px] flex-col justify-center gap-6 overflow-hidden bg-[#002045] p-8 text-white md:p-12">
-
-              <div className="absolute left-6 top-6 z-10 flex items-center gap-1 rounded-full bg-[#ba1a1a] px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-                <span className="material-symbols-outlined animate-pulse text-base">
-                  campaign
-                </span>
-                Breaking News
-              </div>
-
-              <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
-
-              <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-[#f2bc82]/10 blur-2xl" />
-
-              <div className="relative z-10 flex flex-col gap-4">
-
-                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/60">
-                  <span>Displacement Report</span>
-                  <span>•</span>
-                  <span>Updated 2 hours ago</span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-0.5 text-xs font-extrabold uppercase tracking-wide text-white shadow-xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                    Breaking Flood Bulletin
+                  </span>
+                  <span className="text-xs text-white/70 font-mono">Updated 1 hour ago</span>
                 </div>
 
-                <h1 className="max-w-3xl text-3xl font-semibold leading-tight md:text-[40px]">
-                  Critical Displacement Data: Over 5,000 Residents Relocated
-                  in Flooded Regions
+                <h1 className="mt-4 max-w-2xl text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl text-white">
+                  Teesta River Basin Inundation Modeling & Corridor Evacuation Directives
                 </h1>
 
-                <div className="mt-2 flex flex-col gap-2 border-l-2 border-[#f2bc82] pl-4">
-
-                  <p className="text-lg leading-7 text-white/90">
-                    Flood-Affected Regions: North District and Sector 4
-                    (Highland Zones)
+                <div className="mt-3 border-l-2 border-amber-400 pl-4">
+                  <p className="text-sm text-slate-200 leading-relaxed max-w-xl">
+                    Hydro-meteorological data from CWC Melli gauge indicates elevated river levels following upstream catchment surges. Emergency teams and district collectors have initiated localized preventive relocations.
                   </p>
+                </div>
+              </div>
 
-                  <p className="text-base leading-6 text-white/70">
-                    Emergency response teams have completed the primary phase
-                    of relocation efforts. Infrastructure assessments are
-                    prioritizing high-density residential zones in the
-                    affected sectors.
-                  </p>
-
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-4 text-xs">
+                <div className="flex items-center gap-4 text-white/80 font-mono">
+                  <span>🌊 Melli Water Level: 224.6 m</span>
+                  <span>🌧️ 24h Inflow: 42 mm</span>
                 </div>
 
                 <a
-                  href="#"
-                  className="mt-4 flex w-fit items-center gap-1 text-sm font-medium text-[#f2bc82] transition-colors hover:text-[#ffddba]"
+                  href="#latest"
+                  className="flex items-center gap-1.5 font-bold text-amber-300 hover:text-amber-200 transition"
                 >
-                  Read Full Displacement Report
-
-                  <span className="material-symbols-outlined text-base">
-                    arrow_forward
-                  </span>
+                  <span>Explore Telemetry Bulletins</span>
+                  <ArrowRight size={14} />
                 </a>
-
               </div>
             </div>
           </article>
 
-          {/* LATEST UPDATES */}
-          <h2 className="mt-4 border-b border-[#c4c6cf] pb-2 text-2xl font-semibold">
-            Latest Updates
-          </h2>
+          {/* LATEST UPDATES SECTION */}
+          <div id="latest">
+            <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-2">
+                <Newspaper size={20} className="text-blue-700" />
+                <h2 className="text-xl font-extrabold text-[#002045]">
+                  Latest Situation Reports & Advisories
+                </h2>
+              </div>
+              <span className="text-xs text-slate-500 font-semibold font-mono">6 New Bulletins</span>
+            </div>
 
-          {/* NEWS CARDS */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {newsArticles.map((article) => (
-              <NewsCard
-                key={article.title}
-                article={article}
-              />
-            ))}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {newsArticles.map((article) => (
+                <NewsCard key={article.id} article={article} />
+              ))}
+            </div>
           </div>
-
         </div>
 
-        {/* RIGHT SIDEBAR */}
-        <aside className="flex flex-col gap-8 lg:col-span-4">
+        {/* RIGHT COLUMN: TRENDING & NEWSLETTER */}
+        <aside className="flex flex-col gap-6 lg:col-span-4">
+          
+          {/* TRENDING ADVISORIES */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+              <TrendingUp size={18} className="text-blue-700" />
+              <h3 className="text-base font-bold text-[#002045]">
+                Trending Flood Advisories
+              </h3>
+            </div>
 
-          {/* TRENDING */}
-          <section className="rounded-xl border border-[#e3e2e6] bg-white p-6 shadow-sm">
-
-            <h3 className="mb-6 flex items-center gap-2 text-2xl font-semibold">
-              <span className="material-symbols-outlined text-[#002045]">
-                trending_up
-              </span>
-
-              Trending Now
-            </h3>
-
-            <ul className="flex flex-col gap-5">
-
+            <ul className="space-y-4">
               {trending.map((item, index) => (
                 <li
-                  key={item.title}
-                  className={`group flex cursor-pointer gap-4 ${
-                    index > 0
-                      ? "border-t border-[#c4c6cf] pt-5"
-                      : ""
-                  }`}
+                  key={index}
+                  className="group flex cursor-pointer gap-3.5 border-b border-slate-100 pb-3 last:border-0 last:pb-0"
                 >
-
-                  <span className="text-3xl font-semibold leading-none text-[#e3e2e6] transition-colors group-hover:text-[#002045]">
+                  <span className="text-2xl font-extrabold text-slate-300 group-hover:text-blue-700 transition-colors font-mono">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-
-                  <div className="flex flex-col gap-1">
-
-                    <span className="text-xs text-[#43474e]">
+                  <div>
+                    <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
                       {item.category}
                     </span>
-
-                    <p className="text-base leading-6 transition-colors group-hover:text-[#002045]">
+                    <p className="mt-0.5 text-xs font-semibold text-slate-800 group-hover:text-blue-900 transition leading-snug">
                       {item.title}
                     </p>
-
                   </div>
                 </li>
               ))}
-
             </ul>
           </section>
 
-          {/* NEWSLETTER */}
-          <section className="relative overflow-hidden rounded-xl bg-[#002045] p-6 text-white shadow-sm">
+          {/* NEWSLETTER / TELEMETRY DISPATCH SUBSCRIPTION */}
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#002045] to-[#0a356c] p-6 text-white shadow-sm">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-blue-400/15 blur-2xl" />
 
-            <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-
-            <div className="pointer-events-none absolute -bottom-5 -left-5 h-24 w-24 rounded-full bg-[#f2bc82]/20 blur-xl" />
-
-            <div className="relative z-10 flex flex-col gap-4">
-
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
-                <span className="material-symbols-outlined text-2xl">
-                  mail
-                </span>
+            <div className="relative z-10 space-y-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
+                <Mail size={20} />
               </div>
 
-              <h3 className="text-2xl font-semibold">
-                Stay Informed
+              <h3 className="text-base font-extrabold text-white">
+                Daily Flood Bulletin Dispatch
               </h3>
 
-              <p className="text-base leading-6 text-white/80">
-                Subscribe to receive daily briefings and critical alerts
-                directly to your inbox.
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Receive official hydrologic forecasts, hourly river warnings, and critical shelter availability in your inbox.
               </p>
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-2 flex flex-col gap-3"
-              >
+              {subscribed ? (
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 p-3 text-xs font-bold text-emerald-200">
+                  <CheckCircle2 size={16} />
+                  <span>Subscribed! You will receive priority bulletins.</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-2.5">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="official.email@agency.gov.in"
+                    className="w-full rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-white/40 outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <button
+                    type="submit"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500 active:scale-95 shadow-xs"
+                  >
+                    <Send size={13} />
+                    Subscribe to Advisories
+                  </button>
+                </form>
+              )}
 
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  className="w-full rounded-lg bg-[#faf9fd] px-4 py-3 text-base text-[#1a1c1e] outline-none placeholder:text-[#74777f] focus:ring-2 focus:ring-[#1960a3]"
-                />
-
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#f2bc82] px-4 py-3 text-sm font-medium text-[#2b1700] transition-colors hover:bg-[#ffddba]"
-                >
-                  Click for updates
-                </button>
-
-              </form>
-
-              <p className="mt-2 text-center text-xs text-white/60">
-                We respect your privacy. Unsubscribe at any time.
+              <p className="text-[10px] text-white/50 text-center">
+                SDMA Verified Stream. Zero spam guarantee.
               </p>
-
             </div>
           </section>
-
         </aside>
       </main>
 
       {/* FOOTER */}
-      <footer className="mt-auto flex w-full flex-col items-center justify-between gap-4 bg-[#002045] px-4 py-8 text-white md:flex-row md:px-8">
-
-        <div className="text-2xl font-bold">
-          FloodGuard
-        </div>
-
-        <div className="text-center text-sm text-white/80 md:text-left">
-          © 2024 FloodGuard. All rights reserved. Professional GIS
-          Environmental Monitoring.
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-6">
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-[#f2bc82]"
-          >
-            Privacy Policy
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-[#f2bc82]"
-          >
-            Terms of Service
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-[#f2bc82]"
-          >
-            API Documentation
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-[#f2bc82]"
-          >
-            Contact Support
-          </a>
-
+      <footer className="mt-auto border-t border-slate-200 bg-white py-6">
+        <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row md:px-8">
+          <div>
+            © 2025 <strong>Flood Sense</strong> — Spatiotemporal Flood Early Warning Platform.
+          </div>
+          <div className="flex gap-4">
+            <span className="font-semibold text-slate-700">Central Water Commission (CWC) Integrated</span>
+          </div>
         </div>
       </footer>
-
     </div>
   );
-}
+};
 
-export default NewzPage
+export default NewzPage;

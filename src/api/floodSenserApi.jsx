@@ -14,6 +14,19 @@ export function getDashboardLive() {
   return fetchAPI("/dashboard/live");
 }
 
+export async function runSimulation(scenarioId) {
+  const response = await fetch(
+    `${API_BASE_URL}/simulation/${scenarioId}`,
+    { method: "POST" },
+  );
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export function getStatus() {
   return fetchAPI("/status");
 }

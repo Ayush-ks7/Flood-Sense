@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Users,
   TriangleAlert,
@@ -7,26 +7,93 @@ import {
   TrendingUp,
   CheckCircle,
   Info,
-  Map,
+  Map as MapIcon,
   Layers,
-  ListFilter,
+  ClipboardList,
+  PlayCircle,
+  RotateCcw,
+  Sparkles,
+  SlidersHorizontal,
   Waves,
-  Clipboard,
+  Gauge,
 } from "lucide-react";
+import gsap from "gsap";
 import FloodMap from "./FloodMap";
-import { getDashboardLive } from "../api/floodSenserApi";
+import { getDashboardLive, runSimulation } from "../api/floodSenserApi";
 
 const RiskMap = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
+  const [simulationOpen, setSimulationOpen] = useState(false);
+  const [selectedScenario, setSelectedScenario] = useState(null);
+  const [simulationLoading, setSimulationLoading] = useState(false);
+  const [incidentFilter, setIncidentFilter] = useState("all");
+
+  const containerRef = useRef(null);
+  const kpiGridRef = useRef(null);
+  const simDrawerRef = useRef(null);
+
+  // Definitive scenario descriptions with to-the-point button labels and telemetry parameters
+  const scenarios = [
+    {
+      id: "normal",
+      name: "1. Baseline Flow",
+      badge: "Normal Routine",
+      buttonLabel: "Simulate Baseline Flow",
+      level: "223.8 m",
+      rain: "8 mm / 24h",
+      badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+      activeBorder: "border-emerald-500 bg-emerald-50/70",
+      cardColor: "hover:border-emerald-400 bg-emerald-50/30",
+      desc: "Low catchment precipitation. River channel within stable non-flood capacity.",
+    },
+    {
+      id: "watch",
+      name: "2. Heavy-Rain Watch",
+      badge: "Elevated Inflow",
+      buttonLabel: "Simulate Heavy Rain",
+      level: "224.6 m",
+      rain: "42 mm / 24h",
+      badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+      activeBorder: "border-amber-500 bg-amber-50/70",
+      cardColor: "hover:border-amber-400 bg-amber-50/30",
+      desc: "Sustained upstream catchment downpour triggers pre-alert monitoring.",
+    },
+    {
+      id: "alert",
+      name: "3. Bankfull Alert",
+      badge: "Warning Level",
+      buttonLabel: "Simulate Bankfull Rise",
+      level: "226.2 m",
+      rain: "74 mm / 24h",
+      badgeColor: "bg-orange-100 text-orange-800 border-orange-300",
+      activeBorder: "border-orange-500 bg-orange-50/70",
+      cardColor: "hover:border-orange-400 bg-orange-50/30",
+      desc: "Warning threshold reached (226.2m). Shelters and rescue teams readied.",
+    },
+    {
+      id: "warning",
+      name: "4. Flood Emergency Breach",
+      badge: "Crisis Evacuation",
+      buttonLabel: "Simulate Flood Emergency",
+      level: "227.4 m",
+      rain: "112 mm / 24h",
+      badgeColor: "bg-red-100 text-red-800 border-red-300",
+      activeBorder: "border-red-500 bg-red-50/70",
+      cardColor: "hover:border-red-400 bg-red-50/30",
+      desc: "Danger threshold exceeded (227.4m). Critical inundation and emergency mobilization.",
+    },
+  ];
 
   // Fetch live dashboard data
   useEffect(() => {
     let isMounted = true;
 
     const loadDashboard = async () => {
+      if (selectedScenario) return;
+
       try {
         const data = await getDashboardLive();
 
@@ -36,7 +103,6 @@ const RiskMap = () => {
         }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
-
         if (isMounted) {
           setError(err.message);
         }
@@ -47,44 +113,131 @@ const RiskMap = () => {
       }
     };
 
-    // Initial request
     loadDashboard();
-
-    // Refresh every 30 seconds
     const interval = setInterval(loadDashboard, 30000);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [selectedScenario]);
+
+  // GSAP initial load entrance animation
+  useEffect(() => {
+    if (!loading && dashboard && containerRef.current) {
+      const ctx = gsap.context(() => {
+        gsap.from(".gsap-header", {
+          opacity: 0,
+          y: -15,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+
+        gsap.from(".gsap-kpi-card", {
+          opacity: 0,
+          y: 20,
+          stagger: 0.08,
+          duration: 0.6,
+          ease: "power3.out",
+        });
+
+        gsap.from(".gsap-main-grid", {
+          opacity: 0,
+          y: 20,
+          duration: 0.7,
+          delay: 0.2,
+          ease: "power2.out",
+        });
+      }, containerRef);
+
+      return () => ctx.revert();
+    }
+  }, [loading]);
+
+  // GSAP drawer slide animation when simulationOpen changes
+  useEffect(() => {
+    if (simDrawerRef.current) {
+      if (simulationOpen) {
+        gsap.fromTo(
+          simDrawerRef.current,
+          { opacity: 0, height: 0, scale: 0.98 },
+          { opacity: 1, height: "auto", scale: 1, duration: 0.45, ease: "power3.out" }
+        );
+      }
+    }
+  }, [simulationOpen]);
+
+  const selectScenario = async (scenario) => {
+    setSimulationLoading(true);
+    try {
+      const data = await runSimulation(scenario.id);
+      setDashboard(data);
+      setSelectedScenario(scenario.id);
+      setError(null);
+
+      // Flash highlight animation on metric values
+      if (kpiGridRef.current) {
+        gsap.fromTo(
+          ".kpi-val",
+          { scale: 1.12, color: "#7c3aed" },
+          { scale: 1, color: "#002045", duration: 0.6, ease: "elastic.out(1, 0.4)" }
+        );
+      }
+    } catch (err) {
+      console.error("Failed to run simulation:", err);
+      setError(err.message);
+    } finally {
+      setSimulationLoading(false);
+    }
+  };
+
+  const returnToLive = async () => {
+    setSelectedScenario(null);
+    setSimulationLoading(true);
+    try {
+      const data = await getDashboardLive();
+      setDashboard(data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to return to live:", err);
+    } finally {
+      setSimulationLoading(false);
+    }
+  };
 
   const incidentStyles = {
     critical: {
-      border: "border-red-600",
-      bg: "bg-red-50",
-      text: "text-red-600",
+      border: "border-red-500",
+      bg: "bg-red-50/90",
+      text: "text-red-700",
+      tag: "bg-red-100 text-red-800",
     },
     warning: {
-      border: "border-orange-600",
-      bg: "bg-orange-50",
-      text: "text-orange-600",
+      border: "border-amber-500",
+      bg: "bg-amber-50/90",
+      text: "text-amber-700",
+      tag: "bg-amber-100 text-amber-800",
     },
     update: {
-      border: "border-blue-600",
-      bg: "bg-blue-50",
-      text: "text-blue-600",
+      border: "border-blue-500",
+      bg: "bg-blue-50/90",
+      text: "text-blue-700",
+      tag: "bg-blue-100 text-blue-800",
     },
   };
 
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#faf9fd]">
-        <div className="text-center">
-          <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-          <p className="text-sm font-medium text-gray-600">
-            Loading Flood-Sense data...
+      <div className="flex min-h-[80vh] items-center justify-center bg-[#faf9fd]">
+        <div className="text-center p-8 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-sm">
+          <div className="relative mx-auto mb-4 h-12 w-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin" />
+            <Waves size={20} className="absolute inset-0 m-auto text-blue-600 animate-pulse" />
+          </div>
+          <h3 className="text-base font-bold text-slate-800">Initializing Flood Sense</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            Ingesting CWC telemetry and running spatial risk models...
           </p>
         </div>
       </div>
@@ -94,21 +247,25 @@ const RiskMap = () => {
   // Error state
   if (error || !dashboard) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#faf9fd]">
-        <div className="max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-          <TriangleAlert size={32} className="mx-auto mb-3 text-red-600" />
-
-          <h2 className="text-lg font-semibold text-red-700">
-            Unable to connect to Flood-Sense
+      <div className="flex min-h-[80vh] items-center justify-center bg-[#faf9fd] px-4">
+        <div className="max-w-md rounded-2xl border border-red-200 bg-white p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <TriangleAlert size={28} />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">
+            Unable to connect to Flood Sense
           </h2>
-
           <p className="mt-2 text-sm text-red-600">
-            {error || "No dashboard data received from the backend."}
+            {error || "No dashboard telemetry received from the server."}
           </p>
-
-          <p className="mt-4 text-xs text-gray-500">
-            Make sure the FastAPI server is running on port 8000.
-          </p>
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-xl bg-[#002045] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#002e63]"
+            >
+              Retry Connection
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -116,13 +273,14 @@ const RiskMap = () => {
 
   const kpis = dashboard.kpi_metrics || {};
   const alert = dashboard.alert || {};
+  const telemetry = dashboard.telemetry || {};
+  const telemetryMode = telemetry.data_mode;
+  const isHistoricalReplay = telemetryMode === "HISTORICAL_REPLAY";
 
-  // Convert backend incidents into the format used by the existing UI
-  const incidents = (dashboard.active_incidents || []).map((incident) => {
+  // Incidents mapping
+  const rawIncidents = (dashboard.active_incidents || []).map((incident) => {
     const severity = (incident.severity || "").toUpperCase();
-
     let type = "update";
-
     if (severity.includes("CRITICAL")) {
       type = "critical";
     } else if (severity.includes("WARNING") || severity.includes("HIGH")) {
@@ -139,244 +297,513 @@ const RiskMap = () => {
     };
   });
 
+  const filteredIncidents = rawIncidents.filter((inc) => {
+    if (incidentFilter === "all") return true;
+    return inc.type === incidentFilter;
+  });
+
+  // Calculate river danger percentage for progress gauge
+  const currentWaterLevel = alert.current_water_level_m ?? telemetry.melli_water_level_m ?? 220.0;
+  const warningLevel = alert.warning_level_m ?? 226.2;
+  const dangerLevel = alert.danger_level_m ?? 227.4;
+  const baseLevel = 215.0;
+  const levelPercentage = Math.min(
+    100,
+    Math.max(0, ((currentWaterLevel - baseLevel) / (dangerLevel + 1.0 - baseLevel)) * 100)
+  );
+
   return (
-    <div className="min-h-screen bg-[#faf9fd] text-[#1a1c1e]">
-      {/* ================= MAIN ================= */}
-      <main className="mx-auto w-full max-w-[1440px] space-y-6 p-4 md:p-8">
-        {/* Dashboard Header */}
-        <div className="flex flex-col justify-between gap-4 border-b border-gray-300 pb-4 md:flex-row md:items-end">
+    <div ref={containerRef} className="min-h-screen bg-[#faf9fd] text-[#1a1c1e]">
+      <main className="mx-auto w-full max-w-[1440px] space-y-6 px-4 py-6 md:px-8">
+        
+        {/* ================= DASHBOARD HEADER ================= */}
+        <div className="gsap-header flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-5 md:flex-row md:items-end">
           <div>
-            <h2 className="text-2xl font-semibold text-[#002045] md:text-3xl">
-              Official Response Dashboard
+            <div className="flex items-center gap-2">
+              <span className="rounded-md bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800 uppercase tracking-wider">
+                Teesta Basin · Melli Gauge
+              </span>
+              <span className="text-xs text-slate-400">Station ID: 024-MBDNG</span>
+            </div>
+            
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#002045] md:text-3xl">
+              Official Flood Response & Risk Dashboard
             </h2>
 
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="h-3 w-3 animate-pulse rounded-full bg-red-600 [animation-duration:0.9s]" />
+            {/* Status Beacon Bar */}
+            <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
+              <span
+                className={`relative flex h-2.5 w-2.5 rounded-full ${
+                  selectedScenario
+                    ? "bg-violet-600 animate-ping"
+                    : isHistoricalReplay
+                    ? "bg-amber-500"
+                    : "bg-emerald-500 animate-pulse"
+                }`}
+              />
 
-              <span className="text-sm font-bold text-red-600">
-                LIVE DATA ACTIVE
+              <span
+                className={`font-bold uppercase tracking-wider ${
+                  selectedScenario
+                    ? "text-violet-800 font-extrabold"
+                    : isHistoricalReplay
+                    ? "text-amber-800"
+                    : "text-emerald-700"
+                }`}
+              >
+                {selectedScenario
+                  ? "SIMULATION ACTIVE"
+                  : isHistoricalReplay
+                  ? "VERIFIED REPLAY STREAM"
+                  : "LIVE CWC DATA STREAM"}
               </span>
 
-              <span className="text-sm text-gray-500">
-                | Last updated: {dashboard.last_updated}
+              <span className="text-slate-500">
+                · {selectedScenario
+                  ? `Running scenario model: ${dashboard.simulation?.name || selectedScenario}`
+                  : `Last synced: ${dashboard.last_updated || "Just now"}`}
               </span>
             </div>
           </div>
 
-          <button className="hidden rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 md:block">
-            Export Report
-          </button>
-        </div>
+          {/* Action Control Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {selectedScenario && (
+              <button
+                type="button"
+                onClick={returnToLive}
+                disabled={simulationLoading}
+                className="flex items-center gap-1.5 rounded-xl border border-violet-300 bg-violet-100 px-4 py-2 text-xs font-bold text-violet-900 transition hover:bg-violet-200 active:scale-95 disabled:opacity-50"
+              >
+                <RotateCcw size={14} />
+                Reset to Live Telemetry
+              </button>
+            )}
 
-        {/* ================= KPI CARDS ================= */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Population */}
-          <div className="relative flex flex-col gap-2 overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-full bg-red-100 opacity-60" />
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Users size={20} className="text-red-600" />
-              {kpis.total_affected_population?.title ||
-                "Total Affected Population"}
-            </div>
-
-            <div className="text-4xl font-bold text-[#002045]">
-              {kpis.total_affected_population?.value ?? "--"}
-            </div>
-
-            <div className="flex items-center gap-1 text-xs font-semibold text-red-600">
-              <TrendingUp size={16} />
-              {kpis.total_affected_population?.trend || "--"}
-            </div>
-          </div>
-
-          {/* High Risk */}
-          <div className="relative flex flex-col gap-2 overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-full bg-red-100 opacity-60" />
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <TriangleAlert size={20} className="text-red-600" />
-              {kpis.active_high_risk_zones?.title || "Active High Risk Zones"}
-            </div>
-
-            <div className="text-4xl font-bold text-[#002045]">
-              {kpis.active_high_risk_zones?.value ?? "--"}
-            </div>
-
-            <div className="flex items-center gap-1 text-xs font-semibold text-red-600">
-              <TriangleAlert size={16} />
-              {kpis.active_high_risk_zones?.subtext || "--"}
-            </div>
-          </div>
-
-          {/* Rescue Teams */}
-          <div className="relative flex flex-col gap-2 overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-full bg-blue-100 opacity-60" />
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Truck size={20} className="text-blue-600" />
-              {kpis.dispatched_rescue_teams?.title || "Dispatched Rescue Teams"}
-            </div>
-
-            <div className="text-4xl font-bold text-[#002045]">
-              {kpis.dispatched_rescue_teams?.value ?? "--"}
-            </div>
-
-            <div className="flex items-center gap-1 text-xs font-semibold text-blue-600">
-              <CheckCircle size={16} />
-              {kpis.dispatched_rescue_teams?.subtext || "--"}
-            </div>
-          </div>
-
-          {/* Shelter */}
-          <div className="relative flex flex-col gap-2 overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-full bg-orange-100 opacity-60" />
-
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <House size={20} className="text-orange-600" />
-              {kpis.shelter_occupancy?.title || "Shelter Occupancy"}
-            </div>
-
-            <div className="text-4xl font-bold text-[#002045]">
-              {kpis.shelter_occupancy?.value ?? "--"}
-            </div>
-
-            <div className="flex items-center gap-1 text-xs font-semibold text-orange-600">
-              <Info size={16} />
-              {kpis.shelter_occupancy?.subtext || "--"}
-            </div>
+            <button
+              type="button"
+              onClick={() => setSimulationOpen((open) => !open)}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-xs active:scale-95 ${
+                simulationOpen
+                  ? "bg-slate-800 text-white hover:bg-slate-900"
+                  : "bg-gradient-to-r from-violet-700 to-indigo-700 text-white hover:from-violet-800 hover:to-indigo-800 shadow-violet-500/20"
+              }`}
+            >
+              <SlidersHorizontal size={15} />
+              {simulationOpen ? "Close Simulation Studio" : "Scenario Simulation Studio"}
+            </button>
           </div>
         </div>
 
-        {/* ================= ALERT ================= */}
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-3">
-            <TriangleAlert size={22} className="mt-0.5 shrink-0 text-red-600" />
-
-            <div>
-              <div className="text-sm font-bold text-red-700">
-                {alert.tier || "ALERT"}
+        {/* ================= SIMULATION STUDIO DRAWER ================= */}
+        {simulationOpen && (
+          <div
+            ref={simDrawerRef}
+            className="overflow-hidden rounded-2xl border-2 border-violet-300/80 bg-gradient-to-br from-violet-50/95 via-white to-indigo-50/90 p-5 shadow-md shadow-violet-200/50"
+          >
+            <div className="flex flex-col justify-between gap-3 border-b border-violet-200/60 pb-4 md:flex-row md:items-center">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Sparkles size={18} className="text-violet-700" />
+                  <h3 className="text-base font-bold text-violet-950">
+                    Hydrological What-If Model Simulator
+                  </h3>
+                </div>
+                <p className="mt-0.5 text-xs text-violet-800">
+                  Select a simulation scenario to rerun the Quantile LSTM forecast and spatial flood inundation models with customized telemetry.
+                </p>
               </div>
 
-              <p className="mt-1 text-sm text-red-700">
-                {alert.description || "No alert information available."}
-              </p>
+              {simulationLoading && (
+                <div className="flex items-center gap-2 rounded-lg bg-violet-200/70 px-3 py-1 text-xs font-bold text-violet-900">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-700 border-t-transparent" />
+                  <span>Computing Hydro Models...</span>
+                </div>
+              )}
+            </div>
 
-              <div className="mt-2 text-xs text-red-600">
-                Current water level:{" "}
-                <strong>{alert.current_water_level_m ?? "--"} m</strong>
-                {" · "}
-                Danger level: <strong>{alert.danger_level_m ?? "--"} m</strong>
+            {/* Scenario Buttons Grid with To-the-Point Nomenclature */}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {scenarios.map((scenario) => {
+                const isActive = selectedScenario === scenario.id;
+
+                return (
+                  <div
+                    key={scenario.id}
+                    className={`flex flex-col justify-between rounded-xl border p-4 transition-all duration-200 ${
+                      isActive
+                        ? `${scenario.activeBorder} shadow-sm ring-2 ring-violet-600 ring-offset-1`
+                        : `border-slate-200 bg-white ${scenario.cardColor}`
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-sm font-extrabold text-slate-900">
+                          {scenario.name}
+                        </span>
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide border ${scenario.badgeColor}`}
+                        >
+                          {scenario.badge}
+                        </span>
+                      </div>
+
+                      {/* Telemetry specs chip */}
+                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                          🌊 Gauge: <strong className="font-mono">{scenario.level}</strong>
+                        </span>
+                        <span className="rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                          🌧️ Rain: <strong className="font-mono">{scenario.rain}</strong>
+                        </span>
+                      </div>
+
+                      <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                        {scenario.desc}
+                      </p>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      type="button"
+                      disabled={simulationLoading}
+                      onClick={() => selectScenario(scenario)}
+                      className={`mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 px-3 text-xs font-bold transition-all disabled:opacity-50 ${
+                        isActive
+                          ? "bg-violet-700 text-white shadow-xs"
+                          : "bg-slate-900 text-white hover:bg-violet-700 active:scale-95"
+                      }`}
+                    >
+                      {isActive ? (
+                        <>
+                          <CheckCircle size={14} />
+                          Active Scenario
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle size={14} />
+                          {scenario.buttonLabel}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Active Simulation Status Banner */}
+            {selectedScenario && dashboard.simulation && (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-300 bg-white/90 p-3.5 text-xs text-violet-950">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-violet-600 animate-ping" />
+                  <span>
+                    <strong>Active Output:</strong> {dashboard.simulation.name} — {dashboard.simulation.description}{" "}
+                    <span className="text-violet-700 font-medium font-mono">({dashboard.simulation.assumptions})</span>
+                  </span>
+                </div>
+                <button
+                  onClick={returnToLive}
+                  className="font-bold text-violet-700 underline hover:text-violet-950"
+                >
+                  Exit Simulation
+                </button>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= RIVER WATER LEVEL GAUGE BAR ================= */}
+        <div className="gsap-header rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                <Gauge size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[#002045]">
+                    Melli CWC River Stage Meter
+                  </h3>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase ${
+                      currentWaterLevel >= dangerLevel
+                        ? "bg-red-100 text-red-800"
+                        : currentWaterLevel >= warningLevel
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-emerald-100 text-emerald-800"
+                    }`}
+                  >
+                    {alert.tier || "Routine Monitoring"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Real-time gauge level vs India CWC Warning ({warningLevel}m) & Danger ({dangerLevel}m) levels
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
+              <div>
+                <span className="text-slate-500">Current: </span>
+                <strong className="text-base font-extrabold text-[#002045] font-mono">
+                  {currentWaterLevel.toFixed(2)} m
+                </strong>
+              </div>
+              <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+              <div>
+                <span className="text-amber-700 font-semibold">Warning: </span>
+                <strong className="font-mono">{warningLevel} m</strong>
+              </div>
+              <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+              <div>
+                <span className="text-red-700 font-semibold">Danger: </span>
+                <strong className="font-mono">{dangerLevel} m</strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-3 relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ease-out ${
+                currentWaterLevel >= dangerLevel
+                  ? "bg-red-600"
+                  : currentWaterLevel >= warningLevel
+                  ? "bg-amber-500"
+                  : "bg-blue-600"
+              }`}
+              style={{ width: `${Math.max(5, levelPercentage)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* ================= KPI METRIC CARDS ================= */}
+        <div ref={kpiGridRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          
+          {/* Total Affected Population */}
+          <div className="gsap-kpi-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {kpis.total_affected_population?.title || "Affected Population"}
+              </span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                <Users size={17} />
+              </div>
+            </div>
+
+            <div className="my-2">
+              <div className="kpi-val text-3xl font-extrabold text-[#002045] font-mono">
+                {kpis.total_affected_population?.value ?? "--"}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-bold text-red-600">
+              <TrendingUp size={14} />
+              <span>{kpis.total_affected_population?.trend || "High exposure"}</span>
+            </div>
+          </div>
+
+          {/* High Risk Zones */}
+          <div className="gsap-kpi-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {kpis.active_high_risk_zones?.title || "Active High Risk Zones"}
+              </span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                <TriangleAlert size={17} />
+              </div>
+            </div>
+
+            <div className="my-2">
+              <div className="kpi-val text-3xl font-extrabold text-[#002045] font-mono">
+                {kpis.active_high_risk_zones?.value ?? "--"}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-bold text-red-600">
+              <TriangleAlert size={14} />
+              <span>{kpis.active_high_risk_zones?.subtext || "Monitored zones"}</span>
+            </div>
+          </div>
+
+          {/* Forecast Peak (P90) */}
+          <div className="gsap-kpi-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {kpis.dispatched_rescue_teams?.title || "Forecast Peak (P90)"}
+              </span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <Truck size={17} />
+              </div>
+            </div>
+
+            <div className="my-2">
+              <div className="kpi-val text-3xl font-extrabold text-[#002045] font-mono">
+                {kpis.dispatched_rescue_teams?.value ?? "--"}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
+              <CheckCircle size={14} />
+              <span>{kpis.dispatched_rescue_teams?.subtext || "Bi-LSTM 24h forecast"}</span>
+            </div>
+          </div>
+
+          {/* Shelter Occupancy */}
+          <div className="gsap-kpi-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {kpis.shelter_occupancy?.title || "Shelter Occupancy"}
+              </span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                <House size={17} />
+              </div>
+            </div>
+
+            <div className="my-2">
+              <div className="kpi-val text-3xl font-extrabold text-[#002045] font-mono">
+                {kpis.shelter_occupancy?.value ?? "--"}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
+              <Info size={14} />
+              <span>{kpis.shelter_occupancy?.subtext || "Capacity available"}</span>
             </div>
           </div>
         </div>
 
-        {/* ================= MAP + INCIDENTS ================= */}
-        <div className="grid h-auto grid-cols-1 gap-4 lg:h-[600px] lg:grid-cols-3">
-          {/* ================= MAP ================= */}
-          <div className="relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:col-span-2">
+        {/* ================= MAP + INCIDENTS SPLIT VIEW ================= */}
+        <div className="gsap-main-grid grid h-auto grid-cols-1 gap-6 lg:grid-cols-3">
+          
+          {/* ================= MAP CONTAINER ================= */}
+          <div className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs lg:col-span-2">
+            
             {/* Map Header */}
-            <div className="z-10 flex items-center justify-between border-b border-gray-200 bg-gray-50 p-4">
-              <h3 className="flex items-center gap-2 text-xl font-semibold text-[#002045]">
-                <Map size={22} />
-                Real-time Monitoring Map
-              </h3>
+            <div className="z-10 flex items-center justify-between border-b border-slate-200/80 bg-slate-50/90 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <MapIcon size={18} className="text-blue-700" />
+                <h3 className="text-sm font-bold text-[#002045]">
+                  High-Resolution Geospatial Flood Risk Map
+                </h3>
+              </div>
 
-              <div className="flex gap-2">
-                <button className="flex items-center gap-1 rounded border border-gray-300 bg-white p-2 text-xs transition hover:bg-gray-100">
-                  <Layers size={17} />
-                  <span className="hidden sm:inline">Layers</span>
-                </button>
-
-                <button className="flex items-center gap-1 rounded border border-gray-300 bg-white p-2 text-xs transition hover:bg-gray-100">
-                  <ListFilter size={17} />
-                  <span className="hidden sm:inline">Filters</span>
-                </button>
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 font-semibold">
+                  <Layers size={13} className="text-slate-400" />
+                  <span>XGBoost Inundation</span>
+                </div>
               </div>
             </div>
 
             {/* Map */}
-            <div className="relative min-h-[450px] flex-1 bg-gray-200">
+            <div className="relative min-h-[480px] flex-1 bg-slate-100">
               <FloodMap
                 dashboard={dashboard}
                 selectedIncidentId={selectedIncidentId}
                 onIncidentSelect={setSelectedIncidentId}
               />
 
-              {/* Map Legend */}
-              <div className="absolute bottom-4 left-4 z-[1000] w-48 rounded-lg border border-gray-300 bg-white p-4 shadow-md">
-                <h4 className="mb-2 text-sm font-bold">Legend</h4>
+              {/* Map Floating Legend */}
+              <div className="absolute bottom-4 left-4 z-[1000] rounded-xl border border-slate-200/90 bg-white/95 p-3.5 shadow-lg backdrop-blur-sm max-w-[200px]">
+                <h4 className="mb-2 text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                  Risk Legend
+                </h4>
 
-                <div className="space-y-2 text-xs">
+                <div className="space-y-1.5 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="h-3 w-3 rounded-full bg-red-600" />
-                    Critical Risk
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
+                    <span className="font-medium text-slate-700">Critical Flood Risk</span>
                   </div>
-
                   <div className="flex items-center gap-2">
-                    <span className="h-3 w-3 rounded-full bg-orange-600" />
-                    Moderate Risk
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                    <span className="font-medium text-slate-700">Moderate Inflow</span>
                   </div>
-
                   <div className="flex items-center gap-2">
-                    <span className="h-3 w-3 rounded-full bg-blue-600" />
-                    Rescue Team
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Waves size={16} className="text-[#002045]" />
-                    Flood Gate
+                    <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                    <span className="font-medium text-slate-700">Model Hotspot</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ================= INCIDENTS ================= */}
-          <div className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-gray-200 bg-gray-50 p-4">
-              <h3 className="flex items-center gap-2 text-xl font-semibold text-[#002045]">
-                <Clipboard size={22} className="text-red-600" />
-                Active Incidents
-              </h3>
+          {/* ================= INCIDENTS / HOTSPOTS LIST ================= */}
+          <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+            
+            {/* Hotspot Header */}
+            <div className="border-b border-slate-200/80 bg-slate-50/90 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ClipboardList size={18} className="text-red-600" />
+                  <h3 className="text-sm font-bold text-[#002045]">
+                    Model Detected Hotspots
+                  </h3>
+                </div>
+                <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-bold text-slate-700 font-mono">
+                  {rawIncidents.length}
+                </span>
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="mt-3 flex gap-1 rounded-lg bg-slate-200/70 p-1 text-[11px] font-semibold">
+                {["all", "critical", "warning", "update"].map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setIncidentFilter(tab)}
+                    className={`flex-1 rounded-md py-1 capitalize transition ${
+                      incidentFilter === tab
+                        ? "bg-white text-slate-900 font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {incidents.length === 0 ? (
-                <div className="py-8 text-center text-sm text-gray-500">
-                  No active incidents.
+            {/* Hotspots scroll container */}
+            <div className="flex-1 space-y-3 overflow-y-auto p-4 max-h-[500px]">
+              {filteredIncidents.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-500">
+                  No active risk hotspots matching this filter.
                 </div>
               ) : (
-                incidents.map((incident) => {
-                  const style =
-                    incidentStyles[incident.type] || incidentStyles.update;
+                filteredIncidents.map((incident) => {
+                  const style = incidentStyles[incident.type] || incidentStyles.update;
+                  const isSelected = selectedIncidentId === incident.id;
 
                   return (
                     <div
                       key={incident.id}
                       onClick={() => setSelectedIncidentId(incident.id)}
-                      className={`cursor-pointer rounded-r-lg border-l-4 ${style.border} ${style.bg} p-3 transition hover:shadow-md ${
-                        selectedIncidentId === incident.id
-                          ? "ring-2 ring-blue-500"
-                          : ""
+                      className={`cursor-pointer rounded-xl border-l-4 p-3.5 transition hover:shadow-md ${
+                        style.border
+                      } ${style.bg} ${
+                        isSelected
+                          ? "ring-2 ring-blue-600 ring-offset-1"
+                          : "hover:bg-opacity-100"
                       }`}
                     >
-                      <div className="mb-1 flex items-start justify-between gap-2">
-                        <span className={`text-xs font-bold ${style.text}`}>
+                      <div className="mb-1.5 flex items-center justify-between gap-2">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${style.tag}`}
+                        >
                           {incident.level}
                         </span>
 
-                        <span className="text-xs text-gray-500">
+                        <span className="text-[11px] font-medium text-slate-500">
                           {incident.time}
                         </span>
                       </div>
 
-                      <h4 className="text-sm font-bold text-gray-900">
+                      <h4 className="text-xs font-bold text-slate-900">
                         {incident.title}
                       </h4>
 
-                      <p className="mt-1 text-sm leading-5 text-gray-500">
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600">
                         {incident.description}
                       </p>
                     </div>

@@ -14,7 +14,7 @@ except ImportError:
         pass
 
 class Settings:
-    PROJECT_NAME: str = "FloodGuard (SERENITY) Official Flood Response System"
+    PROJECT_NAME: str = "Flood Sense Official Flood Response System"
     VERSION: str = "3.0.0"
     API_V1_STR: str = "/api"
     

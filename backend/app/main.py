@@ -7,13 +7,13 @@ from backend.app.db.spatial_engine import spatial_engine
 from backend.app.services.inference_engine import inference_engine
 from backend.app.services.live_telemetry_service import live_telemetry_service
 from backend.app.services.scheduler import telemetry_scheduler
-from backend.app.routers import dashboard, forecast, spatial_risk, incidents, benchmarks, reports
+from backend.app.routers import dashboard, forecast, spatial_risk, incidents, benchmarks, reports, simulation
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup Sequence
     print("=" * 80)
-    print("Starting FloodGuard (SERENITY) — Production Flood Response API")
+    print("Starting Flood Sense — Production Flood Response API")
     print("=" * 80)
     
     t0 = time.time()
@@ -30,15 +30,15 @@ async def lifespan(app: FastAPI):
     telemetry_scheduler.start()
     
     elapsed = round((time.time() - t0), 2)
-    print(f"[FloodGuard Core] All services online and ready in {elapsed}s!")
+    print(f"[Flood Sense Core] All services online and ready in {elapsed}s!")
     print("=" * 80)
     
     yield
     
     # Shutdown Sequence
-    print("[FloodGuard Core] Shutting down background tasks...")
+    print("[Flood Sense Core] Shutting down background tasks...")
     telemetry_scheduler.shutdown()
-    print("[FloodGuard Core] Clean shutdown complete.")
+    print("[Flood Sense Core] Clean shutdown complete.")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -63,6 +63,7 @@ app.include_router(spatial_risk.router, prefix=settings.API_V1_STR)
 app.include_router(incidents.router, prefix=settings.API_V1_STR)
 app.include_router(benchmarks.router, prefix=settings.API_V1_STR)
 app.include_router(reports.router, prefix=settings.API_V1_STR)
+app.include_router(simulation.router, prefix=settings.API_V1_STR)
 
 @app.get("/api/status", tags=["Status"])
 def get_system_status():
@@ -86,7 +87,7 @@ def get_system_status():
 @app.get("/", tags=["Root"])
 def root_status():
     return {
-        "message": "FloodGuard (SERENITY) API is running.",
+        "message": "Flood Sense API is running.",
         "documentation": "/docs",
         "dashboard_endpoint": "/api/dashboard/live"
     }

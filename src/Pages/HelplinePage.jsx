@@ -1,41 +1,108 @@
-import { useState } from "react";
-import RiskMap from "./RiskMap";
-import FloodMap from "./FloodMap";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  PhoneCall,
+  LifeBuoy,
+  Hospital,
+  Shield,
+  Truck,
+  Building,
+  Navigation,
+  CheckCircle2,
+  AlertCircle,
+  Radio,
+  Clock,
+  PhoneForwarded,
+  MapPin,
+  Flame,
+  ArrowUpRight,
+} from "lucide-react";
+import gsap from "gsap";
 
 const emergencyContacts = [
   {
-    title: "Search & Rescue",
-    subtitle: "Highland & Coastal",
-    icon: "support",
-    iconStyle: "bg-[#1a365d] text-white",
+    title: "Search & Rescue Operations",
+    subtitle: "NDRF, SDRF & Teesta Patrols",
+    icon: LifeBuoy,
+    iconStyle: "bg-blue-600 text-white",
     contacts: [
       {
-        name: "Highland Response Team",
-        description: "Mountain and hill rescues.",
-        phone: "1-800-555-0199",
+        name: "NDRF 2nd Battalion (Sikkim Unit)",
+        description: "Specialized waterborne flood rescue & swift extraction.",
+        phone: "1078",
+        rawPhone: "1078",
+        badge: "24/7 Rapid Response",
       },
       {
-        name: "Coastal Patrol",
-        description: "Waterborne extraction.",
-        phone: "1-800-555-0200",
+        name: "SDRF Teesta River Patrol",
+        description: "Zodiac boat deployment along Melli – Singtam banks.",
+        phone: "+91-3592-202986",
+        rawPhone: "+913592202986",
+        badge: "Standby Boats",
+      },
+      {
+        name: "Highland Search & Mountain Rescue",
+        description: "Slope stability & landslide clearance squads.",
+        phone: "+91-3592-202112",
+        rawPhone: "+913592202112",
+        badge: "Mountain Squad",
       },
     ],
   },
   {
-    title: "Medical & First Aid",
-    subtitle: "Triage & Transport",
-    icon: "local_hospital",
-    iconStyle: "bg-[#7db6ff] text-[#00477f]",
+    title: "Emergency Medical & Trauma Care",
+    subtitle: "Triage & Field Ambulances",
+    icon: Hospital,
+    iconStyle: "bg-emerald-600 text-white",
     contacts: [
       {
-        name: "Regional Hospital",
-        description: "24/7 ER Operations.",
-        phone: "1-800-555-0300",
+        name: "District Emergency Hospital (Singtam)",
+        description: "24/7 Level-2 Trauma Care & Emergency Inpatient.",
+        phone: "108",
+        rawPhone: "108",
+        badge: "National Medical 108",
       },
       {
-        name: "Mobile Clinics Dispatch",
-        description: "Field medical support.",
-        phone: "1-800-555-0301",
+        name: "STNM Multispeciality Hospital (Gangtok)",
+        description: "Critical ICU, ventilator support, and emergency surgeries.",
+        phone: "+91-3592-202944",
+        rawPhone: "+913592202944",
+        badge: "Tertiary Referral",
+      },
+      {
+        name: "Mobile Flood Relief Medical Vans",
+        description: "Field triage, waterborne disease prevention & clean supplies.",
+        phone: "+91-3592-202319",
+        rawPhone: "+913592202319",
+        badge: "On Field",
+      },
+    ],
+  },
+  {
+    title: "Control Rooms & Flood Operations",
+    subtitle: "CWC, SDMA & District Collectors",
+    icon: Radio,
+    iconStyle: "bg-indigo-600 text-white",
+    contacts: [
+      {
+        name: "CWC Teesta Basin Hydrology Cell",
+        description: "Official real-time river level updates & flood forecasting.",
+        phone: "+91-3592-203401",
+        rawPhone: "+913592203401",
+        badge: "Telemetry Ops",
+      },
+      {
+        name: "District Emergency Ops Centre (DEOC)",
+        description: "District Collectorate emergency coordination & evacuation orders.",
+        phone: "1077",
+        rawPhone: "1077",
+        badge: "DEOC Control",
+      },
+      {
+        name: "State Disaster Management Authority (SSDMA)",
+        description: "High-level state coordination and resource deployment.",
+        phone: "+91-3592-205387",
+        rawPhone: "+913592205387",
+        badge: "SDMA HQ",
       },
     ],
   },
@@ -43,462 +110,254 @@ const emergencyContacts = [
 
 const vehicleStatus = [
   {
-    name: "High-Clearance Trucks",
-    status: "Available",
-    color: "bg-green-500",
+    name: "High-Clearance All-Terrain Trucks",
+    status: "8 Units Active",
+    color: "bg-emerald-500",
+    detail: "Stationed at Melli Checkpost & Singtam Bridge",
   },
   {
-    name: "Waterborne Rescue Boats",
-    status: "On Standby",
-    color: "bg-yellow-500",
+    name: "Inflatable Waterborne Rescue Zodiacs",
+    status: "6 Boats Deployed",
+    color: "bg-emerald-500",
+    detail: "Equipped with outboard engines and life buoys",
   },
   {
-    name: "Aerial Extraction Units",
-    status: "Limited Availability",
-    color: "bg-yellow-500",
-  },
-];
-
-const routeStatus = [
-  {
-    name: "National Highway Route",
-    status: "Open",
-    color: "bg-green-500",
+    name: "Drone Aerial Reconnaissance Units",
+    status: "3 Squads Airborne",
+    color: "bg-blue-500",
+    detail: "Monitoring landslide choke points & river breach areas",
   },
   {
-    name: "Coastal Highway",
-    status: "Restricted",
-    color: "bg-yellow-500",
-  },
-  {
-    name: "Central Valley Pass",
-    status: "Closed - Use Alternate",
-    color: "bg-[#ba1a1a]",
+    name: "Helicopter Air-Evacuation Helipad",
+    status: "Standby at Gangtok",
+    color: "bg-amber-500",
+    detail: "Subject to highland cloud ceiling conditions",
   },
 ];
 
 const shelters = [
   {
-    name: "Red Cross",
-    capacity: "65% Capacity",
-    color: "bg-yellow-500",
+    name: "Melli Senior Secondary School Shelter",
+    capacity: 250,
+    occupied: 140,
+    percent: 56,
+    color: "bg-blue-600",
+    location: "Melli Bazaar Upper Plateau",
   },
   {
-    name: "Central Community Center",
-    capacity: "FULL",
-    color: "bg-[#ba1a1a]",
+    name: "Singtam Community Relief Centre",
+    capacity: 400,
+    occupied: 330,
+    percent: 82,
+    color: "bg-amber-500",
+    location: "National Highway 10 Highland",
   },
   {
-    name: "Care India",
-    capacity: "40% Capacity",
-    color: "bg-green-500",
+    name: "Red Cross Emergency Transit Shelter",
+    capacity: 180,
+    occupied: 65,
+    percent: 36,
+    color: "bg-emerald-500",
+    location: "Rangpo Sector 3",
   },
 ];
 
-function ContactCard({ contactGroup }) {
+const HelplinePage = () => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const ctx = gsap.context(() => {
+        gsap.from(".gsap-helpline-card", {
+          opacity: 0,
+          y: 20,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      }, containerRef);
+
+      return () => ctx.revert();
+    }
+  }, []);
+
   return (
-    <div className="flex h-full flex-col rounded-xl border border-[#c4c6cf] bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-start gap-4 border-b border-[#c4c6cf] pb-4">
-        <div
-          className={`flex-shrink-0 rounded-lg p-3 ${contactGroup.iconStyle}`}
-        >
-          <span className="material-symbols-outlined">{contactGroup.icon}</span>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-bold text-[#1a1c1e]">
-            {contactGroup.title}
-          </h3>
-
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#43474e]">
-            {contactGroup.subtitle}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-grow flex-col gap-4">
-        {contactGroup.contacts.map((contact) => (
-          <div
-            key={contact.name}
-            className="flex items-center justify-between gap-4"
-          >
+    <div ref={containerRef} className="min-h-screen bg-[#faf9fd] text-[#1a1c1e]">
+      <main className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">
+        
+        {/* Header */}
+        <section className="mb-8 border-b border-slate-200 pb-6">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <p className="font-semibold text-[#002045]">{contact.name}</p>
-
-              <p className="text-sm text-[#43474e]">{contact.description}</p>
+              <div className="mb-2 flex items-center gap-2">
+                <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700 uppercase tracking-wider">
+                  Official Emergency Directory
+                </span>
+              </div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-[#002045] md:text-4xl">
+                Emergency Helplines & Rescue Dispatch
+              </h2>
+              <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+                Direct phone lines to National Disaster Response Force, medical trauma centres, emergency control rooms, and flood evacuation shelters.
+              </p>
             </div>
 
-            <a
-              href={`tel:${contact.phone}`}
-              aria-label={`Call ${contact.name}`}
-              className="flex-shrink-0 rounded-full p-2 text-[#1960a3] transition-colors hover:bg-[#d3e4ff]"
-            >
-              <span className="material-symbols-outlined">call</span>
-            </a>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StatusCard({ title, icon, iconStyle, items }) {
-  return (
-    <div className="flex h-full flex-col rounded-xl border border-[#c4c6cf] bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-start gap-4 border-b border-[#c4c6cf] pb-4">
-        <div className={`flex-shrink-0 rounded-lg p-3 ${iconStyle}`}>
-          <span className="material-symbols-outlined">{icon}</span>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-bold text-[#1a1c1e]">{title}</h3>
-
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#43474e]">
-            {title === "Escape Vehicle Availability"
-              ? "Fleet Status"
-              : "Traffic & Access"}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-grow flex-col gap-4">
-        {items.map((item) => (
-          <div
-            key={item.name}
-            className="flex items-center justify-between gap-4"
-          >
-            <div>
-              <p className="font-semibold text-[#002045]">{item.name}</p>
-
-              <p className="text-sm text-[#43474e]">{item.status}</p>
-            </div>
-
-            <div
-              className={`h-3 w-3 flex-shrink-0 rounded-full ${item.color}`}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ShelterList() {
-  return (
-    <div className="flex h-full flex-col rounded-xl border border-[#c4c6cf] bg-white p-6 shadow-sm">
-      <h3 className="mb-4 border-b border-[#c4c6cf] pb-4 text-lg font-bold text-[#1a1c1e]">
-        Nearby Shelters
-      </h3>
-
-      <div className="flex flex-col gap-6">
-        {shelters.map((shelter) => (
-          <div
-            key={shelter.name}
-            className="flex items-start justify-between gap-4"
-          >
-            <div>
-              <p className="font-semibold text-[#002045]">{shelter.name}</p>
-
-              <div className="mt-1 flex items-center gap-2">
-                <div className={`h-2 w-2 rounded-full ${shelter.color}`} />
-
-                <p className="text-sm text-[#43474e]">{shelter.capacity}</p>
+            {/* Quick SOS Card */}
+            <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50/90 p-4 shadow-xs">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-600 text-white shadow-sm">
+                <PhoneForwarded size={22} className="animate-pulse" />
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-red-700 uppercase tracking-wide">
+                  Universal Disaster Helpline
+                </span>
+                <div className="text-xl font-extrabold text-[#002045]">
+                  <a href="tel:112" className="hover:underline">112</a> / <a href="tel:1078" className="hover:underline">1078 (NDRF)</a>
+                </div>
               </div>
             </div>
-
-            <button
-              type="button"
-              className="flex items-center gap-1 rounded-lg border border-[#1960a3] px-3 py-1 text-xs font-semibold text-[#1960a3] transition-colors hover:bg-[#d3e4ff]"
-            >
-              <span className="material-symbols-outlined text-sm">near_me</span>
-              Get Directions
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const HelplinePage = () => {
-  const [requestType, setRequestType] = useState("Sandbag Delivery");
-
-  const [location, setLocation] = useState("");
-  const [phone, setPhone] = useState("");
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    alert(
-      `Request submitted!\nType: ${requestType}\nLocation: ${location}\nPhone: ${phone}`,
-    );
-
-    setLocation("");
-    setPhone("");
-  };
-
-  return (
-    <div className="flex min-h-screen flex-col bg-[#faf9fd] font-['Public_Sans',sans-serif] text-[#1a1c1e]">
-      {/* MAIN */}
-      <main className="mx-auto flex w-full max-w-[1440px] flex-grow flex-col gap-12 px-4 py-8 md:px-8 md:py-12">
-        {/* SOS */}
-        <section className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-xl border border-[#ba1a1a] bg-[#ffdad6] p-8 md:flex-row">
-          <div className="pointer-events-none absolute inset-0 opacity-10 [background-image:repeating-linear-gradient(45deg,#ba1a1a_25%,transparent_25%,transparent_75%,#ba1a1a_75%,#ba1a1a),repeating-linear-gradient(45deg,#ba1a1a_25%,#faf9fd_25%,#faf9fd_75%,#ba1a1a_75%,#ba1a1a)] [background-position:0_0,10px_10px] [background-size:20px_20px]" />
-
-          <div className="relative z-10 flex-1">
-            <div className="mb-2 flex items-center gap-3 text-[#ba1a1a]">
-              <span
-                className="material-symbols-outlined text-[32px]"
-                style={{
-                  fontVariationSettings: "'FILL' 1",
-                }}
-              >
-                warning
-              </span>
-
-              <h1 className="text-2xl font-semibold md:text-[32px] md:leading-10">
-                Life-Threatening Emergency?
-              </h1>
-            </div>
-
-            <p className="max-w-2xl text-lg leading-7 text-[#93000a]">
-              If you or someone else is in immediate danger, do not wait. Call
-              emergency services immediately.
-            </p>
-          </div>
-
-          <div className="relative z-10">
-            <a
-              href="tel:911"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#ba1a1a] px-8 py-4 text-2xl font-bold text-white shadow-lg transition-transform hover:scale-105"
-            >
-              <span className="material-symbols-outlined">call</span>
-              Dial 	1077
-            </a>
           </div>
         </section>
 
-        {/* CONTACTS + FORM */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* LEFT */}
-          <div className="flex flex-col gap-8 lg:col-span-2">
-            {/* Emergency Contacts */}
-            <section>
-              <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-[#002045]">
-                <span className="material-symbols-outlined text-[#1960a3]">
-                  contact_phone
-                </span>
-                Emergency Contacts Directory
-              </h2>
+        {/* Directory Grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {emergencyContacts.map((group, index) => {
+            const Icon = group.icon;
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {emergencyContacts.map((group) => (
-                  <ContactCard key={group.title} contactGroup={group} />
-                ))}
-              </div>
-            </section>
-
-            {/* Evacuation & Transport */}
-            <section>
-              <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-[#002045]">
-                <span className="material-symbols-outlined text-[#1960a3]">
-                  local_shipping
-                </span>
-                Evacuation &amp; Transport
-              </h2>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <StatusCard
-                  title="Escape Vehicle Availability"
-                  icon="directions_car"
-                  iconStyle="bg-[#1a365d] text-white"
-                  items={vehicleStatus}
-                />
-
-                <StatusCard
-                  title="Evacuation Routes & Safe Zones"
-                  icon="map"
-                  iconStyle="bg-[#7db6ff] text-[#00477f]"
-                  items={routeStatus}
-                />
-              </div>
-            </section>
-
-            {/* Relief Shelters */}
-            <section>
-              <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-[#002045]">
-                <span className="material-symbols-outlined text-[#1960a3]">
-                  home_pin
-                </span>
-                Relief Shelter Locations
-              </h2>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {/* Map */}
-                <div className="relative flex h-[400px] flex-col overflow-hidden rounded-xl border border-[#c4c6cf] bg-white shadow-sm">
-                  <div className="z-10 flex items-center justify-between border-b border-[#e3e2e6] bg-[#f4f3f7] p-4">
-                    <h3 className="flex items-center gap-2 text-sm font-bold text-[#002045]">
-                      <span className="material-symbols-outlined text-[20px]">
-                        map
-                      </span>
-                      Real-time Monitoring Map
-                    </h3>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 rounded border border-[#c4c6cf] bg-white px-2 py-1 text-xs hover:bg-[#e3e2e6]"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">
-                          layers
-                        </span>
-                        Layers
-                      </button>
-
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 rounded border border-[#c4c6cf] bg-white px-2 py-1 text-xs hover:bg-[#e3e2e6]"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">
-                          filter_list
-                        </span>
-                        Filters
-                      </button>
+            return (
+              <div
+                key={index}
+                className="gsap-helpline-card flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition hover:shadow-md"
+              >
+                <div>
+                  {/* Category Header */}
+                  <div className="mb-5 flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${group.iconStyle} shadow-xs`}>
+                      <Icon size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-[#002045]">
+                        {group.title}
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-500">
+                        {group.subtitle}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="relative flex-grow bg-[#dad9dd]">
-                    {<FloodMap />}
+                  {/* Contacts List */}
+                  <div className="space-y-4">
+                    {group.contacts.map((contact, idx) => (
+                      <div
+                        key={idx}
+                        className="flex flex-col justify-between rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 transition hover:border-slate-300 hover:bg-slate-50"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-xs font-bold text-slate-900">
+                            {contact.name}
+                          </span>
+                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-extrabold text-blue-800 uppercase tracking-wide">
+                            {contact.badge}
+                          </span>
+                        </div>
+
+                        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                          {contact.description}
+                        </p>
+
+                        <div className="mt-3 flex items-center justify-between border-t border-slate-200/60 pt-2.5">
+                          <span className="font-mono text-xs font-bold text-slate-800">
+                            {contact.phone}
+                          </span>
+                          <a
+                            href={`tel:${contact.rawPhone}`}
+                            className="flex items-center gap-1 rounded-lg bg-[#002045] px-3 py-1 text-xs font-bold text-white transition hover:bg-blue-700 active:scale-95 shadow-xs"
+                          >
+                            <PhoneCall size={12} />
+                            Call Now
+                          </a>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                <ShelterList />
               </div>
-            </section>
+            );
+          })}
+        </div>
+
+        {/* ================= RESCUE FLEET & SHELTERS STATUS ================= */}
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          
+          {/* Fleet Status */}
+          <div className="gsap-helpline-card rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
+            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-3">
+              <Truck size={20} className="text-blue-700" />
+              <h3 className="text-base font-bold text-[#002045]">
+                Rescue Fleet & Equipment Readiness
+              </h3>
+            </div>
+
+            <div className="space-y-3">
+              {vehicleStatus.map((vehicle, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 p-3.5"
+                >
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">{vehicle.name}</h4>
+                    <p className="text-[11px] text-slate-500">{vehicle.detail}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${vehicle.color}`} />
+                    <span className="text-xs font-bold text-slate-800">{vehicle.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="flex flex-col gap-8">
-            {/* Assistance Form */}
-            <section className="rounded-xl border border-[#c4c6cf] bg-white p-6 shadow-sm">
-              <h3 className="mb-2 flex items-center gap-2 text-2xl font-semibold text-[#002045]">
-                <span className="material-symbols-outlined text-[#1960a3]">
-                  assignment
-                </span>
-                Non-Emergency Assistance
+          {/* Shelter Capacity */}
+          <div className="gsap-helpline-card rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs">
+            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-3">
+              <Building size={20} className="text-blue-700" />
+              <h3 className="text-base font-bold text-[#002045]">
+                Designated Evacuation Shelters
               </h3>
+            </div>
 
-              <p className="mb-6 text-base leading-6 text-[#43474e]">
-                Request sandbags, wellness checks, or report minor flooding
-                issues.
-              </p>
+            <div className="space-y-4">
+              {shelters.map((shelter, index) => (
+                <div key={index} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">{shelter.name}</h4>
+                      <p className="flex items-center gap-1 text-[11px] text-slate-500">
+                        <MapPin size={11} /> {shelter.location}
+                      </p>
+                    </div>
+                    <span className="text-xs font-extrabold text-slate-800 font-mono">
+                      {shelter.occupied} / {shelter.capacity} Beds
+                    </span>
+                  </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Request Type
-                  </label>
-
-                  <select
-                    value={requestType}
-                    onChange={(e) => setRequestType(e.target.value)}
-                    className="w-full rounded border-[#c4c6cf] bg-[#faf9fd] text-base focus:border-[#1960a3] focus:ring-2 focus:ring-[#1960a3]"
-                  >
-                    <option>Sandbag Delivery</option>
-                    <option>Wellness Check</option>
-                    <option>Minor Debris Removal</option>
-                    <option>Other Inquiry</option>
-                  </select>
+                  <div className="mt-2.5 flex items-center gap-3">
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
+                      <div
+                        className={`h-full rounded-full ${shelter.color}`}
+                        style={{ width: `${shelter.percent}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 font-mono">
+                      {shelter.percent}%
+                    </span>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Location Details
-                  </label>
-
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Address or intersection"
-                    className="w-full rounded border-[#c4c6cf] bg-[#faf9fd] text-base focus:border-[#1960a3] focus:ring-2 focus:ring-[#1960a3]"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Contact Number
-                  </label>
-
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91"
-                    className="w-full rounded border-[#c4c6cf] bg-[#faf9fd] text-base focus:border-[#1960a3] focus:ring-2 focus:ring-[#1960a3]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#1a365d] py-3 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-                >
-                  Submit Request
-                  <span className="material-symbols-outlined">send</span>
-                </button>
-              </form>
-            </section>
+              ))}
+            </div>
           </div>
         </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="mt-auto grid w-full grid-cols-1 gap-8 bg-[#002045] px-4 py-12 text-white md:grid-cols-4 md:px-8">
-        <div className="flex flex-col gap-4 md:col-span-1">
-          <span className="text-2xl font-bold">FloodGuard</span>
-
-          <p className="text-base leading-6 text-white/80">
-            © 2026 FloodGuard Emergency Management Systems. All rights reserved.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-start gap-x-8 gap-y-4 md:col-span-3 md:justify-end">
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-white"
-          >
-            Privacy Policy
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-white"
-          >
-            Terms of Service
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-white"
-          >
-            Data Sources
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-white"
-          >
-            Contact Support
-          </a>
-
-          <a
-            href="#"
-            className="text-sm text-white/80 transition-colors hover:text-white"
-          >
-            Official Portal
-          </a>
-        </div>
-      </footer>
     </div>
   );
 };

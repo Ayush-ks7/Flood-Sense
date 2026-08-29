@@ -55,7 +55,7 @@ def export_situation_report(format: str = "json"):
 - **Bridges Under Active Observation**: `{impact['bridges_at_risk']}`
 
 ---
-*Report synthesized automatically by FloodGuard (SERENITY) C++ ONNX Engine.*
+*Report synthesized automatically by Flood Sense C++ ONNX Engine.*
 """
         return PlainTextResponse(content=md, media_type="text/markdown")
 
