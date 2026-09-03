@@ -1,0 +1,13 @@
+Feature,Importance_Gain
+hand_m,0.75753814
+upstream_area_km2,0.1949318
+slope_deg,0.010151843
+rain_prev_1d,0.008348943
+elevation_m,0.007898426
+rain_prev_7d,0.0059945355
+rain_prev_3d,0.0042580953
+dist_to_river_m,0.0039010001
+lulc,0.0030753003
+melli_water_level_m,0.0026002969
+aspect_deg,0.001301567
+melli_rise_1h,0.0

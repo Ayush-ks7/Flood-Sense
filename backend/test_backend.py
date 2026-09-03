@@ -10,7 +10,7 @@ from backend.app.main import app
 
 def run_all_backend_tests():
     print("=" * 80)
-    print("Running Full Verification Suite for FloodGuard (SERENITY) Backend")
+    print("Running Full Verification Suite for FloodSense Backend")
     print("=" * 80)
     
     with TestClient(app) as client:
